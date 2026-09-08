@@ -33,30 +33,34 @@ def load_data():
     # ---------- locate the two files (same logic as before) ----------
     psm_candidates = [
         os.path.join("data", "HumanBreast_Phase2_psm_best.tsv"),
-        "HumanBreast_Phase2_psm_best.tsv",
-        "/home/workdir/attachments/HumanBreast_Phase2_psm_best.tsv",
+        #"HumanBreast_Phase2_psm_best.tsv",
+        #"/home/workdir/attachments/HumanBreast_Phase2_psm_best.tsv",
     ]
     frag_candidates = [
-        os.path.join("data", "HumanBreast_Phase2_fragments.tsv"),
+        #os.path.join("data", "HumanBreast_Phase2_fragments.tsv"),
         os.path.join("data", "HumanBreast_Phase2_fragments.tsv.zip"),
-        os.path.join("data", "HumanBreast_Phase2_fragments.zip"),
-        "HumanBreast_Phase2_fragments.tsv",
-        "HumanBreast_Phase2_fragments.tsv.zip",
-        "HumanBreast_Phase2_fragments.zip",
-        "/home/workdir/attachments/HumanBreast_Phase2_fragments.tsv",
-        "/home/workdir/attachments/HumanBreast_Phase2_fragments.tsv.zip",
-        "/home/workdir/attachments/HumanBreast_Phase2_fragments.zip",
+        #os.path.join("data", "HumanBreast_Phase2_fragments.zip"),
+        #"HumanBreast_Phase2_fragments.tsv",
+        #"HumanBreast_Phase2_fragments.tsv.zip",
+        #"HumanBreast_Phase2_fragments.zip",
+        #"/home/workdir/attachments/HumanBreast_Phase2_fragments.tsv",
+        #"/home/workdir/attachments/HumanBreast_Phase2_fragments.tsv.zip",
+        #"/home/workdir/attachments/HumanBreast_Phase2_fragments.zip",
     ]
 
     psm_path = next((p for p in psm_candidates if os.path.exists(p)), None)
     frag_path = next((p for p in frag_candidates if os.path.exists(p)), None)
 
     if psm_path is None:
-        st.error("Could not find HumanBreast_Phase2_psm_best.tsv")
-        st.stop()
+        raise FileNotFoundError(
+            "Could not find HumanBreast_Phase2_psm_best.tsv.\n"
+            "Place the file in the repo root or in a folder named 'data/'."
+        )
     if frag_path is None:
-        st.error("Could not find HumanBreast_Phase2_fragments (.tsv or .zip)")
-        st.stop()
+        raise FileNotFoundError(
+            "Could not find HumanBreast_Phase2_fragments (.tsv or .zip).\n"
+            "Place the file in the repo root or in a folder named 'data/'."
+        )
 
     # ---------- load PSM (normal TSV) ----------
     usecols_psm = [
@@ -74,33 +78,35 @@ def load_data():
     frag_usecols = ["USI", "Ion_Label", "Ion_mz", "Ion_Intensity", "Peptide", "Precursor"]
 
     def read_fragments(path):
-        """Read TSV whether it is plain or inside a ZIP archive."""
         path = Path(path)
-
-        # Case 1: file is a ZIP (by extension or by magic)
         is_zip = path.suffix.lower() == ".zip" or zipfile.is_zipfile(path)
-
         if is_zip:
             with zipfile.ZipFile(path, "r") as zf:
-                # Prefer a .tsv / .csv member; otherwise take the first file
-                members = [m for m in zf.namelist()
-                           if m.lower().endswith((".tsv", ".csv", ".txt"))]
+                members = [m for m in zf.namelist() if m.lower().endswith((".tsv", ".csv", ".txt"))]
                 if not members:
                     members = zf.namelist()
                 if not members:
                     raise ValueError(f"ZIP archive {path} is empty")
-                inner = members[0]
-                with zf.open(inner) as f:
+                with zf.open(members[0]) as f:
                     return pd.read_csv(f, sep="\t", usecols=lambda c: c in frag_usecols)
         else:
-            # Plain TSV
             return pd.read_csv(path, sep="\t", usecols=lambda c: c in frag_usecols)
 
-    try:
-        df_frag = read_fragments(frag_path)
-    except Exception as e:
-        st.error(f"Failed to read fragments file ({frag_path}): {e}")
-        st.stop()
+    df_frag = read_fragments(frag_path)
+
+    return df_psm, df_frag
+
+
+# ---- Call the loader and stop cleanly if it fails ----
+try:
+    df, df_fragments = load_data()
+except Exception as e:
+    st.error("Failed to load PAMSI data files.")
+    st.exception(e)          # shows the real error on Cloud
+    st.stop()                # prevents the NameError later
+
+# Now it is safe to build the sidebar
+exp_options = sorted(df["Experiment_Table"].dropna().unique().tolist())
 
     # Optional mouse datasets (unchanged)
     mouse_dfs = []
