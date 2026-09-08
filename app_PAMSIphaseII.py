@@ -108,28 +108,26 @@ except Exception as e:
 # Now it is safe to build the sidebar
 exp_options = sorted(df["Experiment_Table"].dropna().unique().tolist())
 
-    # Optional mouse datasets (unchanged)
-    mouse_dfs = []
-    for name, fname in [("Mouse Cochlea 2026", "MouseCochlea_2025.csv"),
-                        ("Mouse Tibia 2026", "MouseTibia_2026.csv")]:
-        for base in ["data", ".", "/home/workdir/attachments"]:
-            p = os.path.join(base, fname)
-            if os.path.exists(p):
-                try:
-                    d = pd.read_csv(p)
-                    d["Experiment_Table"] = name
-                    mouse_dfs.append(d)
-                except Exception:
-                    pass
-                break
-
-    if mouse_dfs:
-        df_all = pd.concat([df_psm] + mouse_dfs, ignore_index=True, sort=False)
-    else:
-        df_all = df_psm
-
-    return df_all, df_frag
-
+# Optional mouse datasets (unchanged)
+mouse_dfs = []
+for name, fname in [("Mouse Cochlea 2026", "MouseCochlea_2025.csv"),
+                    ("Mouse Tibia 2026", "MouseTibia_2026.csv")]:
+                        for base in ["data", ".", "/home/workdir/attachments"]:
+                            p = os.path.join(base, fname)
+                            if os.path.exists(p):
+                                try:
+                                    d = pd.read_csv(p)
+                                    d["Experiment_Table"] = name
+                                    mouse_dfs.append(d)
+                                except Exception:
+                                    pass
+                                    break
+                                    if mouse_dfs:
+                                        df_all = pd.concat([df_psm] + mouse_dfs, ignore_index=True, sort=False)
+                                    else:
+                                        df_all = df_psm
+                                        return df_all, df_frag
+                                        
 # ================== SIDEBAR FILTERS ==================
 st.sidebar.header("🔎 PAMSI Search Controls")
 
