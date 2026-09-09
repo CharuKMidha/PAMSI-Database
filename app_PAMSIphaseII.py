@@ -213,75 +213,88 @@ if "filtered" in st.session_state:
             mime="text/csv"
         )
 
-        # ========== SPECTRUM VIEWER ==========
-        st.markdown("---")
-        st.subheader("🔬 Spectrum Viewer (annotated fragments)")
+# ========== SPECTRUM VIEWER ==========
+st.markdown("---")
+st.subheader("🔬 Spectrum Viewer (annotated fragments)")
 
-        # Build selectable list of USIs from current results
-        usi_options = filtered["USI"].dropna().unique().tolist()
-        if not usi_options:
-            st.info("No USIs available in the current result set.")
-        else:
-            selected_usi = st.selectbox(
-                "Select a peptide USI to view its spectrum",
-                options=usi_options,
-                format_func=lambda u: u.split(":")[-1] if ":" in u else u  # show short form
+# Build a clean mapping: display label → full USI
+# We use the Precursor column (much more readable)
+usi_map = {}
+for _, row in filtered.drop_duplicates(subset=["USI"]).iterrows():
+    usi = row["USI"]
+    precursor = row.get("Precursor", "")
+    peptide = row.get("Peptide", "")
+    hyperscore = row.get("Hyperscore", "")
+    
+    # Nice readable label for the dropdown
+    label = f"{precursor}  |  {peptide}  (score: {hyperscore})"
+    usi_map[label] = usi
+
+if not usi_map:
+    st.info("No USIs available in the current result set.")
+else:
+    selected_label = st.selectbox(
+        "Select a peptide to view its spectrum",
+        options=list(usi_map.keys()),
+        help="Showing Precursor | Peptide sequence (Hyperscore)"
+    )
+    
+    selected_usi = usi_map[selected_label]
+
+    # Get fragments for this USI
+    frags = df_fragments[df_fragments["USI"] == selected_usi].copy()
+    
+    if frags.empty:
+        st.warning("No fragment ions found for the selected peptide.")
+    else:
+        # Metadata header
+        meta = filtered[filtered["USI"] == selected_usi].iloc[0]
+        st.markdown(
+            f"**Peptide:** `{meta.get('Peptide', '')}` &nbsp;|&nbsp; "
+            f"**Precursor:** `{meta.get('Precursor', '')}` &nbsp;|&nbsp; "
+            f"**Protein:** `{meta.get('Protein', '')}` &nbsp;|&nbsp; "
+            f"**Hyperscore:** {meta.get('Hyperscore', 'N/A')}"
+        )
+
+        # Interactive spectrum (unchanged)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=frags["Ion_mz"],
+            y=frags["Ion_Intensity"],
+            mode="markers+text",
+            marker=dict(size=8, color="#1f77b4"),
+            text=frags["Ion_Label"],
+            textposition="top center",
+            textfont=dict(size=9),
+            hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
+            name="Annotated ions"
+        ))
+        
+        for _, row in frags.iterrows():
+            fig.add_shape(
+                type="line",
+                x0=row["Ion_mz"], x1=row["Ion_mz"],
+                y0=0, y1=row["Ion_Intensity"],
+                line=dict(color="rgba(31,119,180,0.4)", width=1)
             )
 
-            # Get fragments for this USI
-            frags = df_fragments[df_fragments["USI"] == selected_usi].copy()
-            if frags.empty:
-                st.warning("No fragment ions found for the selected USI.")
-            else:
-                # Optional metadata
-                meta = filtered[filtered["USI"] == selected_usi].iloc[0]
-                st.markdown(
-                    f"**Peptide:** `{meta.get('Peptide', '')}` &nbsp;|&nbsp; "
-                    f"**Precursor:** `{meta.get('Precursor', '')}` &nbsp;|&nbsp; "
-                    f"**Protein:** `{meta.get('Protein', '')}` &nbsp;|&nbsp; "
-                    f"**Hyperscore:** {meta.get('Hyperscore', 'N/A')}"
-                )
+        fig.update_layout(
+            title=f"Annotated Spectrum – {meta.get('Precursor', selected_usi.split(':')[-1])}",
+            xaxis_title="m/z",
+            yaxis_title="Intensity",
+            template="plotly_white",
+            height=500,
+            showlegend=False,
+            hovermode="closest"
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
-                # Interactive spectrum
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(
-                    x=frags["Ion_mz"],
-                    y=frags["Ion_Intensity"],
-                    mode="markers+text",
-                    marker=dict(size=8, color="#1f77b4"),
-                    text=frags["Ion_Label"],
-                    textposition="top center",
-                    textfont=dict(size=9),
-                    hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
-                    name="Annotated ions"
-                ))
-                # Optional stem lines
-                for _, row in frags.iterrows():
-                    fig.add_shape(
-                        type="line",
-                        x0=row["Ion_mz"], x1=row["Ion_mz"],
-                        y0=0, y1=row["Ion_Intensity"],
-                        line=dict(color="rgba(31,119,180,0.4)", width=1)
-                    )
-
-                fig.update_layout(
-                    title=f"Annotated Spectrum – {selected_usi.split(':')[-1]}",
-                    xaxis_title="m/z",
-                    yaxis_title="Intensity",
-                    template="plotly_white",
-                    height=500,
-                    showlegend=False,
-                    hovermode="closest"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-
-                # Small table of ions
-                with st.expander("Fragment ion table"):
-                    st.dataframe(
-                        frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
-                        use_container_width=True,
-                        hide_index=True
-                    )
+        with st.expander("Fragment ion table"):
+            st.dataframe(
+                frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
+                use_container_width=True,
+                hide_index=True
+            )
 
 else:
     st.info("Adjust parameters on the left and click **🔍 Search** to query the PAMSI database and open the spectrum viewer.")
