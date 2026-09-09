@@ -295,8 +295,6 @@ else:
                 use_container_width=True,
                 hide_index=True
             )
-
-else:
+    else:
     st.info("Adjust parameters on the left and click **🔍 Search** to query the PAMSI database and open the spectrum viewer.")
-
-st.caption("✅ Private mode • Phase 2 Human Breast (TNBC) + Mouse datasets • USI-linked spectrum viewer • Author Charu Kapil Midha & Prof. Peggi Angel • 2026")
+    st.caption("✅ Private mode • Phase 2 Human Breast (TNBC) + Mouse datasets • USI-linked spectrum viewer • Author Charu Kapil Midha & Prof. Peggi Angel • 2026")
