@@ -114,7 +114,7 @@ st.sidebar.header("🔎 PAMSI Search Controls")
 st.sidebar.subheader("Target Calculated Peptide Mass + H values")
 mass_input = st.sidebar.text_area(
     "Enter mass (comma-separated or one per line)",
-    value="829.44, 1242.64, 1327.66, 1104.55",
+    value="1082.632, 1302.655, 1484.709",
     height=100,
     help="Paste a list with commas or one mass per line (from Calculated.Peptide.M+H)"
 )
