@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="PAMSI — Private Peptide Atlas", layout="wide")
 st.title("🧬 PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
-st.caption("MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • Phase 2 Human Breast + Mouse datasets • Private Access")
+st.caption("MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • Human + Mouse datasets • Private Access")
 
 # ================== PASSWORD PROTECTION ==================
 if "password_correct" not in st.session_state:
