@@ -84,7 +84,7 @@ def load_psm():
         "Tissue", "Organism", "InstrumentModel", "ExperimentID"
     ]
     df = pd.read_csv(PSM_LOCAL, sep="\t", usecols=lambda c: c in usecols)
-    df["Experiment_Table"] = "Human Breast TNBC (Phase 2)"
+    df["Experiment_Table"] = "Human Breast TNBC (112 samples)"
     return df
 
 
@@ -118,8 +118,8 @@ st.sidebar.header("🔎 PAMSI Search Controls")
 
 st.sidebar.subheader("Target Calculated Peptide Mass + H values")
 mass_input = st.sidebar.text_area(
-    "Enter mass (comma-separated or one per line)",
-    value="Add m/z here in comma-separated or one per line",
+    "Enter mass (Add m/z here in comma-separated or one per line)",
+    value="",#"1082.632, 1302.655, 1484.709",
     height=100,
     help="Paste a list with commas or one mass per line (from Calculated.Peptide.M+H)"
 )
@@ -292,4 +292,4 @@ if "filtered" in st.session_state:
 else:
     st.info("Adjust parameters on the left and click **🔍 Search** to query the PAMSI database and open the spectrum viewer.")
 
-st.caption("✅ Private mode • Human and Mouse dataset • Data from GitHub Release only • USI-linked spectrum viewer • Author Charu Kapil Midha & Prof. Peggi Angel • 2026")
+st.caption("✅ Private mode • Human and Mouse dataset • Data from GitHub Release only • USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026")
