@@ -293,7 +293,7 @@ if "filtered" in st.session_state:
                     text=frags["Ion_Label"],
                     textposition="top right",
                     textfont=dict(size=14, color = "black"),# larger black ion labels (b10, y7, …
-                    textangle=-45,
+                    textangle=45,
                     hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
                     name="Annotated ions"
                 ))
