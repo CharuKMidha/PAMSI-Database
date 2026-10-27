@@ -84,7 +84,7 @@ def load_psm():
         "Tissue", "Organism", "InstrumentModel", "ExperimentID"
     ]
     df = pd.read_csv(PSM_LOCAL, sep="\t", usecols=lambda c: c in usecols)
-    df["Experiment_Table"] = "Human Breast TNBC (112 samples)"
+    df["Experiment_Table"] = "Human TNBC"
     return df
 
 
@@ -201,6 +201,7 @@ if "filtered" in st.session_state:
         ]
         display_cols = [c for c in display_cols if c in filtered.columns]
 
+        st.subheader("Precursor table")
         st.dataframe(
             filtered[display_cols],
             use_container_width=True,
@@ -260,7 +261,7 @@ if "filtered" in st.session_state:
                     marker=dict(size=8, color="#1f77b4"),
                     text=frags["Ion_Label"],
                     textposition="top center",
-                    textfont=dict(size=9),
+                    textfont=dict(size=14, color = "black"),# larger black ion labels (b10, y7, …
                     hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
                     name="Annotated ions"
                 ))
@@ -279,6 +280,17 @@ if "filtered" in st.session_state:
                     height=500,
                     showlegend=False,
                     hovermode="closest"
+                    # larger black axis titles and tick labels
+                    font=dict(size=14, color="black"),
+                    xaxis=dict(
+                        title_font=dict(size=16, color="black"),
+                        tickfont=dict(size=14, color="black"),
+                    ),
+                    yaxis=dict(
+                        title_font=dict(size=16, color="black"),
+                        tickfont=dict(size=14, color="black"),
+                    ),
+                    title_font=dict(size=16, color="black")
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
