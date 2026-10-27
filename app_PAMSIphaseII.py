@@ -291,8 +291,9 @@ if "filtered" in st.session_state:
                     mode="markers+text",
                     marker=dict(size=8, color="#1f77b4"),
                     text=frags["Ion_Label"],
-                    textposition="top center",
+                    textposition="top right",
                     textfont=dict(size=14, color = "black"),# larger black ion labels (b10, y7, …
+                    textangle=-45,
                     hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
                     name="Annotated ions"
                 ))
@@ -320,6 +321,7 @@ if "filtered" in st.session_state:
                     yaxis=dict(
                         title_font=dict(size=16, color="black"),
                         tickfont=dict(size=14, color="black"),
+                        range=[0, frags["Ion_Intensity"].max() * 1.25],
                     ),
                     title_font=dict(size=16, color="black")
                 )
