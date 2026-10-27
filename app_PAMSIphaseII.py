@@ -279,7 +279,7 @@ if "filtered" in st.session_state:
                     template="plotly_white",
                     height=500,
                     showlegend=False,
-                    hovermode="closest"
+                    hovermode="closest",
                     # larger black axis titles and tick labels
                     font=dict(size=14, color="black"),
                     xaxis=dict(
