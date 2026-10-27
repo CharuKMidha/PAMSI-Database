@@ -285,18 +285,16 @@ if "filtered" in st.session_state:
                 )
 
                 fig = go.Figure()
+                # Peaks only (no text on the scatter trace)
                 fig.add_trace(go.Scatter(
                     x=frags["Ion_mz"],
                     y=frags["Ion_Intensity"],
-                    mode="markers+text",
+                    mode="markers",
                     marker=dict(size=8, color="#1f77b4"),
-                    text=frags["Ion_Label"],
-                    textposition="top right",
-                    textfont=dict(size=14, color = "black"),# larger black ion labels (b10, y7, …
-                    textangle=45,
                     hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
-                    name="Annotated ions"
-                ))
+                    text=frags["Ion_Label"],   # still used for hover
+                    name="Annotated ions"))
+                # Stem lines
                 for _, row in frags.iterrows():
                     fig.add_shape(
                         type="line",
@@ -304,6 +302,20 @@ if "filtered" in st.session_state:
                         y0=0, y1=row["Ion_Intensity"],
                         line=dict(color="rgba(31,119,180,0.4)", width=1)
                     )
+                # Angled ion labels (b10, y7, …) — annotations support textangle
+                for _, row in frags.iterrows():
+                    fig.add_annotation(
+                        x=row["Ion_mz"],
+                        y=row["Ion_Intensity"],
+                        text=str(row["Ion_Label"]),
+                        showarrow=False,
+                        textangle=-45,                    # 45° tilt
+                        font=dict(size=12, color="black"),
+                        xanchor="left",
+                        yanchor="bottom",
+                        yshift=4,
+                    )
+                    
                 fig.update_layout(
                     title=f"Annotated Spectrum – {meta.get('Precursor', '')}",
                     xaxis_title="m/z",
@@ -312,7 +324,6 @@ if "filtered" in st.session_state:
                     height=500,
                     showlegend=False,
                     hovermode="closest",
-                    # larger black axis titles and tick labels
                     font=dict(size=14, color="black"),
                     xaxis=dict(
                         title_font=dict(size=16, color="black"),
@@ -321,12 +332,11 @@ if "filtered" in st.session_state:
                     yaxis=dict(
                         title_font=dict(size=16, color="black"),
                         tickfont=dict(size=14, color="black"),
-                        range=[0, frags["Ion_Intensity"].max() * 1.25],
+                        range=[0, float(frags["Ion_Intensity"].max()) * 1.35],  # room for angled labels
                     ),
-                    title_font=dict(size=16, color="black")
+                    title_font=dict(size=16, color="black"),
                 )
-                st.plotly_chart(fig, use_container_width=True)
-
+        st.plotly_chart(fig, use_container_width=True)
                 with st.expander("Fragment ion table"):
                     st.dataframe(
                         frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
