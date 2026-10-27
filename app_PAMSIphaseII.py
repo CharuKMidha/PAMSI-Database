@@ -336,7 +336,7 @@ if "filtered" in st.session_state:
                     ),
                     title_font=dict(size=16, color="black"),
                 )
-        st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True)
                 with st.expander("Fragment ion table"):
                     st.dataframe(
                         frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
