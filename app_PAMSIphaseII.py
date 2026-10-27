@@ -192,7 +192,38 @@ if "filtered" in st.session_state:
         st.subheader("📊 Peptide Hits by Experiment / Tissue")
         tissue_counts = filtered["Experiment_Table"].value_counts().reset_index()
         tissue_counts.columns = ["Tissue", "Peptide Count"]
-        st.bar_chart(tissue_counts.set_index("Tissue"))
+        
+        fig_bar = go.Figure(
+            data=[
+                go.Bar(
+                    x=tissue_counts["Tissue"],
+                    y=tissue_counts["Peptide Count"],
+                    marker_color="#1f77b4",
+                    text=tissue_counts["Peptide Count"],
+                    textposition="outside",
+                    textfont=dict(size=14, color="black"),
+                )
+            ]
+        )
+        fig_bar.update_layout(
+            xaxis_title="Experiment / Tissue",
+            yaxis_title="Peptide Count",
+            template="plotly_white",
+            height=350,
+            showlegend=False,
+            font=dict(size=14, color="black"),
+            xaxis=dict(
+                title_font=dict(size=16, color="black"),
+                tickfont=dict(size=14, color="black"),
+            ),
+            yaxis=dict(
+                title_font=dict(size=16, color="black"),
+                tickfont=dict(size=14, color="black"),
+            ),
+            title_font=dict(size=16, color="black"),
+            margin=dict(t=40, b=60),
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
 
         display_cols = [
             "Calculated.Peptide.M+H", "Precursor", "Calibrated.Observed.Mass",
