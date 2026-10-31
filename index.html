@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAMSI — Peptide Atlas for Mass Spectrometry Imaging</title>
+  <meta name="description" content="Private Peptide Atlas for MALDI Imaging Mass Spectrometry of Extracellular Matrix Proteome. Human Breast (TNBC) and Mouse Cochlea datasets." />
+  <style>
+    :root {
+      --primary: #1a365d;
+      --accent: #2b6cb0;
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --text: #2d3748;
+      --muted: #718096;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem; }
+    header {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: white;
+      padding: 3rem 1.25rem;
+      text-align: center;
+    }
+    header h1 { font-size: 2.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    header p { font-size: 1.1rem; opacity: 0.95; max-width: 700px; margin: 0 auto; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+    .cta {
+      display: inline-block;
+      margin-top: 1.75rem;
+      background: #48bb78;
+      color: white;
+      font-weight: 600;
+      font-size: 1.15rem;
+      padding: 0.9rem 2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      transition: transform 0.15s, background 0.15s;
+    }
+    .cta:hover { background: #38a169; transform: translateY(-2px); }
+    section { margin: 2.5rem 0; }
+    h2 { font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; }
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.75rem 0.5rem; border-bottom: 1px solid #e2e8f0; }
+    th { color: var(--muted); font-weight: 600; font-size: 0.9rem; }
+    .download {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 0.35rem 0.9rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .download:hover { background: #2c5282; }
+    .size { color: var(--muted); font-size: 0.9rem; }
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 3rem;
+    }
+    .authors { margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>🧬 PAMSI</h1>
+    <p>Peptide Atlas for Mass Spectrometry Imaging<br>
+       MALDI Imaging • Extracellular Matrix Proteome</p>
+    <div class="badge">Human + Mouse </div>
+    <br>
+    <!-- ⚠️ REPLACE the href below with your actual Streamlit Cloud URL -->
+    <a class="cta" href="https://pamsi-database-angellabsmusc-ckapil.streamlit.app" target="_blank" rel="noopener">
+      🔍 Open PAMSI Search Engine
+    </a>
+  </div>
+</header>
+
+<main class="container">
+
+  <section>
+    <h2>About the Database</h2>
+    <div class="card">
+      <p>
+        <strong>PAMSI</strong> is a private peptide atlas built for MALDI Imaging Mass Spectrometry data of the extracellular matrix proteome.
+        The current release (v1.0-data) contains high-quality peptide-spectrum matches (PSMs) and annotated fragment ions from:
+      </p>
+      <ul style="margin: 1rem 0 0 1.25rem;">
+        <li><strong>Human Breast Cancer (Triple Negative)</strong> — 112 tissue samples</li>
+        <li><strong>Mouse Cochlea</strong> — 16 samples</li>
+      </ul>
+      <p style="margin-top: 1rem;">
+        The interactive search engine allows mass-based querying (ppm tolerance), protein/gene filtering, and annotated spectrum viewing.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Database Files (Public Downloads)</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Description</th>
+            <th>Size</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>HumanBreast_Phase2_psm_best.tsv</strong></td>
+            <td>Human TNBC – best PSM table</td>
+            <td class="size">316 MB</td>
+            <td><a class="download" href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_Phase2_psm_best.tsv">Download</a></td>
+          </tr>
+          <tr>
+            <td><strong>HumanBreast_Phase2_fragments.tsv.zip</strong></td>
+            <td>Human TNBC – annotated fragment ions (zipped)</td>
+            <td class="size">117 MB</td>
+            <td><a class="download" href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_Phase2_fragments.tsv.zip">Download</a></td>
+          </tr>
+          <tr>
+            <td><strong>MouseCochlea_Phase2_psm_best.tsv</strong></td>
+            <td>Mouse Cochlea – best PSM table</td>
+            <td class="size">42.8 MB</td>
+            <td><a class="download" href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/MouseCochlea_Phase2_psm_best.tsv">Download</a></td>
+          </tr>
+          <tr>
+            <td><strong>MouseCochlea_Phase2_fragments.tsv</strong></td>
+            <td>Mouse Cochlea – annotated fragment ions</td>
+            <td class="size">342 MB</td>
+            <td><a class="download" href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/MouseCochlea_Phase2_fragments.tsv">Download</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 1rem; font-size: 0.9rem; color: #718096;">
+        All files are served directly from GitHub Releases (HTTPS). Large files may take time to download depending on your connection.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>How to Use</h2>
+    <div class="card">
+      <ol style="margin-left: 1.25rem;">
+        <li>Click the green <strong>“Open PAMSI Search Engine”</strong> button above.</li>
+        <li>Enter the collaborator password when prompted.</li>
+        <li>Enter one or more target masses (Calculated Peptide M+H), set ppm tolerance, and optionally filter by protein/gene or experiment.</li>
+        <li>Click <strong>Search</strong> to retrieve matching peptides and view annotated spectra.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>Citation & Contact</h2>
+    <div class="card">
+      <p><strong>Authors:</strong> Dr. Charu Kapil Midha &amp; Prof. Peggi Angel</p>
+      <p style="margin-top: 0.5rem;">For collaboration or access inquiries, please contact the authors.</p>
+      <p style="margin-top: 0.75rem; font-size: 0.95rem;">
+        Repository: <a href="https://github.com/CharuKMidha/PAMSI-Database" target="_blank">github.com/CharuKMidha/PAMSI-Database</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>PAMSI Database • 2026</p>
+    <p class="authors">Dr. Charu Kapil Midha &amp; Prof. Peggi Angel</p>
+  </div>
+</footer>
+
+</body>
+</html>
