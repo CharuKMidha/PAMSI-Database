@@ -28,17 +28,24 @@ if not st.session_state.password_correct:
 
 # ================== PATHS / URLS (GitHub Release) ==================
 BASE_URL = "https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data"
+DATA_DIR = Path("data")
 
 DATASETS = {
     "Human TNBC": {
         "psm_url": f"{BASE_URL}/HumanBreast_psm_best.tsv",
         "frag_url": f"{BASE_URL}/HumanBreast_fragments.tsv.zip",
         "is_zipped": True,
+        "psm_local": DATA_DIR / "HumanBreast_psm_best.tsv",
+        "frag_tsv_local": DATA_DIR / "HumanBreast_fragments.tsv",
+        "frag_zip_local": DATA_DIR / "HumanBreast_fragments.tsv.zip",
     },
     "Mouse Cochlea": {
         "psm_url": f"{BASE_URL}/Mousecochlea_psm_best.tsv",
         "frag_url": f"{BASE_URL}/Mousecochlea_fragments.tsv",
         "is_zipped": False,
+        "psm_local": DATA_DIR / "Mousecochlea_psm_best.tsv",
+        "frag_tsv_local": DATA_DIR / "Mousecochlea_fragments.tsv",
+        "frag_zip_local": None,   # not used for Mouse
     },
 }
 
