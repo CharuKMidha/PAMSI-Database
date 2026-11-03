@@ -31,19 +31,13 @@ BASE_URL = "https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0
 
 DATASETS = {
     "Human TNBC": {
-        "psm_url": f"{BASE_URL}/HumanBreast_Phase2_psm_best.tsv",
-        "psm_local": Path("data/HumanBreast_Phase2_psm_best.tsv"),
-        "frag_url": f"{BASE_URL}/HumanBreast_Phase2_fragments.tsv.zip",
-        "frag_zip_local": Path("data/HumanBreast_Phase2_fragments.tsv.zip"),
-        "frag_tsv_local": Path("data/HumanBreast_Phase2_fragments.tsv"),
+        "psm_url": f"{BASE_URL}/HumanBreast_psm_best.tsv",
+        "frag_url": f"{BASE_URL}/HumanBreast_fragments.tsv.zip",
         "is_zipped": True,
     },
     "Mouse Cochlea": {
-        "psm_url": f"{BASE_URL}/MouseCochlea_Phase2_psm_best.tsv",
-        "psm_local": Path("data/MouseCochlea_Phase2_psm_best.tsv"),
-        "frag_url": f"{BASE_URL}/MouseCochlea_Phase2_fragments.tsv",
-        "frag_zip_local": None,
-        "frag_tsv_local": Path("data/MouseCochlea_Phase2_fragments.tsv"),
+        "psm_url": f"{BASE_URL}/Mousecochlea_psm_best.tsv",
+        "frag_url": f"{BASE_URL}/Mousecochlea_fragments.tsv",
         "is_zipped": False,
     },
 }
@@ -100,7 +94,7 @@ def load_psm():
     usecols = [
         "Spectrum", "Peptide", "Modified.Peptide", "Charge", "Retention",
         "Calibrated.Observed.Mass", "Calibrated.Observed.M.Z",
-        "Calculated.Peptide.Mass", "Calculated.M.Z", "Calculated.Peptide.M+H",
+        "Calculated.Peptide.Mass", "Calculated.M.Z", "Calibrated.Observed.M+H",
         "Hyperscore", "Probability", "Intensity",
         "Protein", "Gene", "Protein.Description", "Precursor", "USI",
         "Tissue", "Organism", "InstrumentModel", "ExperimentID"
@@ -144,12 +138,12 @@ exp_options = sorted(df["Experiment_Table"].dropna().unique().tolist())
 # ================== SIDEBAR FILTERS ==================
 st.sidebar.header("🔎 PAMSI Search Controls")
 
-st.sidebar.subheader("Target Calculated Peptide Mass + H values")
+st.sidebar.subheader("Target Calibrated Observed Mass + H values")
 mass_input = st.sidebar.text_area(
     "Enter mass (Add m/z here in comma-separated or one per line)",
     value="",
     height=100,
-    help="Paste a list with commas or one mass per line (from Calculated.Peptide.M+H)"
+    help="Paste a list with commas or one mass per line (from Calibrated.Observed.M+H)"
 )
 
 ppm_tolerance = st.sidebar.number_input(
@@ -178,8 +172,8 @@ if st.sidebar.button("🔍 Search", type="primary", use_container_width=True):
 
         mask = df["Experiment_Table"].isin(experiments)
 
-        if targets and "Calculated.Peptide.M+H" in df.columns:
-            mass_col = df["Calculated.Peptide.M+H"].astype(float).values
+        if targets and "Calibrated.Observed.M+H" in df.columns:
+            mass_col = df["Calibrated.Observed.M+H"].astype(float).values
             mass_mask = np.zeros(len(df), dtype=bool)
             for t in targets:
                 window = t * ppm_tolerance / 1e6
@@ -254,7 +248,7 @@ if "filtered" in st.session_state:
         st.plotly_chart(fig_bar, use_container_width=True)
 
         display_cols = [
-            "Calculated.Peptide.M+H", "Precursor", "Calibrated.Observed.Mass",
+            "Calibrated.Observed.M+H", "Precursor", "Calibrated.Observed.Mass",
             "Calibrated.Observed.M.Z", "Hyperscore", "Experiment_Table", "Tissue",
             "Peptide", "Protein", "Gene", "Protein.Description", "USI"
         ]
@@ -342,7 +336,7 @@ if "filtered" in st.session_state:
                         y=row["Ion_Intensity"],
                         text=str(row["Ion_Label"]),
                         showarrow=False,
-                        textangle=-45,
+                        textangle=-90,
                         font=dict(size=12, color="black"),
                         xanchor="left",
                         yanchor="bottom",
