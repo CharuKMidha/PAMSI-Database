@@ -15,7 +15,7 @@ st.set_page_config(
 # Header: logo + title
 col_logo, col_title = st.columns([1, 5])
 with col_logo:
-    st.image("assets/PAMSIlogo.png", width=140)
+    st.image("assets/PAMSIlogotransparent2.png", width=140)
 with col_title:
     st.title("PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
     st.caption(
