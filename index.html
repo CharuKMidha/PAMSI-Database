@@ -10,9 +10,9 @@
     :root {
       --navy: #1a365d;
       --dark-navy: #0f2744;
-      --header-bg: #ffffff;      /* #2c3e50    */
-      --header-text: #1a365d;    /* navy title */
-      --orange: #e67e22;
+      --header-bg: #ffffff;
+      --header-text: #1a365d;
+      --yellow: #f1c40f;
       --beige: #f5f0e6;
       --light-blue: #d6e4f0;
       --text: #1a365d;
@@ -29,7 +29,7 @@
     /* ========== HEADER ========== */
     .top-banner {
       background: var(--header-bg);
-      color: white;
+      color: var(--header-text);
       padding: 1.15rem 1.5rem;
       display: flex;
       align-items: center;
@@ -37,7 +37,7 @@
       position: relative;
       z-index: 100;
       gap: 1rem;
-      border-bottom: 1px solid #e2e8f0;   /* light divider under white bar */
+      border-bottom: 1px solid #e2e8f0;
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
     .top-banner h1 {
@@ -47,12 +47,12 @@
       margin: 0 auto;
       text-align: center;
       flex: 1;
-      color: var(--navy);                 /* navy title */
+      color: var(--navy);
     }
     .menu-btn {
       background: none;
       border: none;
-      color: var(--navy);                 /* navy hamburger (was white) */
+      color: var(--navy);
       font-size: 1.7rem;
       cursor: pointer;
       padding: 0.2rem 0.4rem;
@@ -60,16 +60,15 @@
       opacity: 0.95;
     }
     .menu-btn:hover { opacity: 1; }
-    /* Logo on the top right */
+
     .header-logo {
       flex-shrink: 0;
       display: flex;
       align-items: center;
       text-decoration: none;
     }
-    .header-logo svg,
     .header-logo img {
-      height: 52px;               /* adjust size here */
+      height: 72px;
       width: auto;
       display: block;
     }
@@ -88,11 +87,9 @@
       overflow-y: auto;
       font-size: 0.98rem;
     }
-    .side-menu.open {
-      left: 0;
-    }
+    .side-menu.open { left: 0; }
     .side-menu-header {
-      background: var(--navy);   /* keep navy so menu title stays readable */
+      background: var(--navy);
       color: white;
       padding: 1.1rem 1.25rem;
       font-weight: 600;
@@ -109,9 +106,7 @@
       cursor: pointer;
       line-height: 1;
     }
-    .side-menu nav {
-      padding: 0.75rem 0;
-    }
+    .side-menu nav { padding: 0.75rem 0; }
     .side-menu a {
       display: block;
       padding: 0.7rem 1.4rem;
@@ -120,9 +115,7 @@
       font-weight: 500;
       transition: background 0.15s;
     }
-    .side-menu a:hover {
-      background: #e9ecef;
-    }
+    .side-menu a:hover { background: #e9ecef; }
     .side-menu .section-label {
       padding: 0.9rem 1.4rem 0.35rem;
       font-size: 0.8rem;
@@ -159,16 +152,33 @@
       font-weight: 700;
       color: var(--navy);
     }
-    .orange-bar {
+    .section-bar {
       width: 8px;
       height: 32px;
-      background: var(--orange);
+      background: var(--yellow);
       border-radius: 2px;
       flex-shrink: 0;
     }
 
     /* About */
     .about { background: var(--beige); }
+    .about-lead {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 0.9rem;
+    }
+    .about-lead img {
+      height: 88px;
+      width: auto;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+    .about-lead p {
+      margin-bottom: 0;
+      max-width: 820px;
+      font-size: 1.05rem;
+    }
     .about p { font-size: 1.05rem; max-width: 820px; margin-bottom: 0.9rem; }
     .about ul { margin: 0.8rem 0 1rem 1.5rem; }
     .about li { margin-bottom: 0.35rem; }
@@ -183,6 +193,9 @@
     }
     @media (max-width: 700px) {
       .explore-grid { grid-template-columns: 1fr; }
+      .about-lead { flex-direction: column; align-items: flex-start; }
+      .top-banner h1 { font-size: 1.5rem; }
+      .header-logo img { height: 52px; }
     }
     .explore-card {
       background: white;
@@ -266,20 +279,18 @@
     <nav>
       <a href="#">Home</a>
       <a href="#libraries">Download Library</a>
-      <!-- ⚠️ REPLACE with your real Streamlit Cloud URL -->
       <a href="https://pamsi-database-angellabsmusc-ckapil.streamlit.app" target="_blank" rel="noopener">Query Database</a>
     </nav>
   </div>
   <div class="overlay" id="overlay"></div>
 
   <!-- Top Banner -->
-    <div class="top-banner">
+  <div class="top-banner">
     <button class="menu-btn" id="openMenu" aria-label="Open menu">☰</button>
     <h1>PAMSI Atlas Home</h1>
-
-    <!-- Logo top right — from assets folder -->
     <a href="#" class="header-logo" aria-label="PAMSI home">
-      <img src="https://charukmidha.github.io/PAMSI-Database/assets/PAMSIlogotransparent2.png" alt="PAMSI — Peptide Atlas for MS Imaging" />
+      <img src="assets/PAMSIlogotransparent2.png"
+           alt="PAMSI — Peptide Atlas for MS Imaging" />
     </a>
   </div>
 
@@ -287,13 +298,16 @@
   <section class="about">
     <div class="section-inner">
       <div class="section-title">
-        <div class="orange-bar"></div>
+        <div class="section-bar"></div>
         <h2>About</h2>
       </div>
-      <p>
-        <strong>PAMSI</strong> is a private peptide atlas built for MALDI Imaging Mass Spectrometry data of the extracellular matrix proteome.
-        The current release (v1.0-data) contains high-quality peptide-spectrum matches (PSMs) and annotated fragment ions from:
-      </p>
+      <div class="about-lead">
+        <img src="assets/PAMSIlogotransparent2.png" alt="PAMSI logo" />
+        <p>
+          <strong>PAMSI</strong> is a private peptide atlas built for MALDI Imaging Mass Spectrometry data of the extracellular matrix proteome.
+          The current release (v1.0-data) contains high-quality peptide-spectrum matches (PSMs) and annotated fragment ions from:
+        </p>
+      </div>
       <ul>
         <li><strong>Human Breast Cancer (Triple Negative)</strong> — 60 tissue samples</li>
         <li><strong>Mouse Cochlea</strong> — 16 samples</li>
@@ -308,7 +322,7 @@
   <section class="explore">
     <div class="section-inner">
       <div class="section-title">
-        <div class="orange-bar"></div>
+        <div class="section-bar"></div>
         <h2>Explore</h2>
       </div>
       <div class="explore-grid">
@@ -320,7 +334,6 @@
           </a>
         </div>
         <div class="explore-card">
-          <!-- ⚠️ REPLACE with your real Streamlit Cloud URL -->
           <a href="https://pamsi-database-angellabsmusc-ckapil.streamlit.app" target="_blank" rel="noopener">
             <div class="explore-icon">🔍</div>
             <h3>Query Database</h3>
@@ -335,15 +348,13 @@
   <section class="libraries" id="libraries">
     <div class="section-inner">
       <div class="section-title">
-        <div class="orange-bar"></div>
+        <div class="section-bar"></div>
         <h2>Current Libraries</h2>
       </div>
-
       <div class="chart-container">
         <canvas id="sampleChart" width="360" height="360"></canvas>
       </div>
-      <p class="library-note">Sample distribution in PAMSI v1.0-data (total 128 samples)</p>
-
+      <p class="library-note">Sample distribution in PAMSI v1.0-data (total 76 samples)</p>
       <div style="margin-top: 2rem; overflow-x: auto;">
         <table style="width:100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
           <thead>
@@ -389,7 +400,7 @@
   <section class="publications">
     <div class="section-inner">
       <div class="section-title">
-        <div class="orange-bar"></div>
+        <div class="section-bar"></div>
         <h2>Publications</h2>
       </div>
       <p>
@@ -404,7 +415,7 @@
   <section class="license">
     <div class="section-inner">
       <div class="section-title">
-        <div class="orange-bar"></div>
+        <div class="section-bar"></div>
         <h2>License</h2>
       </div>
       <p>
@@ -433,7 +444,6 @@
   </footer>
 
   <script>
-    // Side menu toggle
     const sideMenu = document.getElementById('sideMenu');
     const overlay = document.getElementById('overlay');
     const openBtn = document.getElementById('openMenu');
@@ -452,12 +462,10 @@
     closeBtn.addEventListener('click', closeMenu);
     overlay.addEventListener('click', closeMenu);
 
-    // Close menu when a link is clicked
     sideMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', closeMenu);
     });
 
-    // Pie chart
     const ctx = document.getElementById('sampleChart').getContext('2d');
     new Chart(ctx, {
       type: 'pie',
@@ -488,6 +496,5 @@
       }
     });
   </script>
-
 </body>
 </html>
