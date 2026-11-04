@@ -8,12 +8,11 @@ import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="PAMSI — Private Peptide Atlas",
-    page_icon="assets/PAMSIlogotransparent2.png",   # browser tab icon
-    st.image("assets/PAMSIlogotransparent2.png", width=140)
+    page_icon="assets/PAMSIlogotransparent2.png",  # optional; needs file in repo
     layout="wide",
 )
 
-# Header: logo + title
+# Header: logo + title  (AFTER set_page_config)
 col_logo, col_title = st.columns([1, 5])
 with col_logo:
     st.image("assets/PAMSIlogotransparent2.png", width=140)
@@ -23,7 +22,6 @@ with col_title:
         "MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • "
         "Human + Mouse datasets • Private Access"
     )
-
 #st.set_page_config(page_title="PAMSI — Private Peptide Atlas", layout="wide")
 #st.title("🧬 PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
 #st.caption("MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • Human + Mouse datasets • Private Access")
@@ -148,15 +146,15 @@ def load_frags_for_usi(usi: str, experiment: str) -> pd.DataFrame:
     return pd.concat(parts, ignore_index=True)
 
 # ---- Startup: load combined PSM + prepare fragment files ----
-try:
-    df = load_psm()
-    # Pre-download both fragment files (so they are ready when user selects a peptide)
-    for exp_name in DATASETS:
-        ensure_fragments_tsv(exp_name)
-except Exception as e:
-    st.error("Failed to prepare PAMSI data from GitHub Release.")
-    st.exception(e)
-    st.stop()
+#try:
+ #   df = load_psm()
+  #  # Pre-download both fragment files (so they are ready when user selects a peptide)
+   # for exp_name in DATASETS:
+    #    ensure_fragments_tsv(exp_name)
+#except Exception as e:
+ #   st.error("Failed to prepare PAMSI data from GitHub Release.")
+  #  st.exception(e)
+   # st.stop()
 
 exp_options = sorted(df["Experiment_Table"].dropna().unique().tolist())
 
