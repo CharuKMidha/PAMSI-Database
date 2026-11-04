@@ -99,10 +99,10 @@ def ensure_fragments_tsv(dataset_name: str):
 def load_psm():
     """Load and combine both Human and Mouse PSM tables."""
     usecols = [
-        "Spectrum", "Peptide", "Modified.Peptide", "Charge", "Retention",
+        "Spectrum", "Peptide", "Modified.Peptide.Unimod", "Charge", "Retention",
         "Calibrated.Observed.Mass", "Calibrated.Observed.M.Z",
         "Calculated.Peptide.Mass", "Calculated.M.Z", "Calibrated.Observed.M+H",
-        "Hyperscore", "Probability", "Intensity",
+        "Hyperscore", "Probability", "Intensity", "Ion.Mobility",
         "Protein", "Gene", "Protein.Description", "Precursor", "USI",
         "Tissue", "Organism", "InstrumentModel", "ExperimentID"
     ]
@@ -255,8 +255,8 @@ if "filtered" in st.session_state:
         st.plotly_chart(fig_bar, use_container_width=True)
 
         display_cols = [
-            "Calibrated.Observed.M+H", "Precursor", "Calibrated.Observed.Mass",
-            "Calibrated.Observed.M.Z", "Hyperscore", "Experiment_Table", "Tissue",
+            "Calibrated.Observed.M+H", "Calibrated.Observed.Mass", "Modified.Peptide.Unimod", "Charge", 
+            "Hyperscore", "Ion.Mobility","Experiment_Table", "Tissue",
             "Peptide", "Protein", "Gene", "Protein.Description", "USI"
         ]
         display_cols = [c for c in display_cols if c in filtered.columns]
