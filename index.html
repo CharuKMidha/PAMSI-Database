@@ -35,10 +35,11 @@
       justify-content: space-between;
       position: relative;
       z-index: 100;
+      gap: 1rem;
     }
     .top-banner h1 {
-      font-size: 1.9rem;
-      font-weight: 400;
+      font-size: 2.45rem;
+      font-weight: 500;
       letter-spacing: 0.5px;
       margin: 0 auto;
       text-align: center;
@@ -55,6 +56,19 @@
       opacity: 0.95;
     }
     .menu-btn:hover { opacity: 1; }
+    /* Logo on the top right */
+    .header-logo {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .header-logo svg,
+    .header-logo img {
+      height: 52px;               /* adjust size here */
+      width: auto;
+      display: block;
+    }
 
     /* ========== SIDE MENU ========== */
     .side-menu {
@@ -255,10 +269,31 @@
   <div class="overlay" id="overlay"></div>
 
   <!-- Top Banner -->
-  <div class="top-banner">
+    <div class="top-banner">
     <button class="menu-btn" id="openMenu" aria-label="Open menu">☰</button>
     <h1>PAMSI Atlas Home</h1>
-    <div style="width: 40px;"></div>
+
+    <!-- Logo top right (inline SVG — no image file required) -->
+    <a href="#" class="header-logo" aria-label="PAMSI home">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 90" role="img" aria-label="PAMSI logo">
+        <!-- subtle arc -->
+        <path d="M20 28 Q140 8 260 22" fill="none" stroke="#5eead4" stroke-width="2"/>
+        <!-- spectrum peaks -->
+        <g stroke="#5eead4" stroke-linecap="round">
+          <line x1="108" y1="58" x2="108" y2="42" stroke-width="3"/>
+          <line x1="122" y1="58" x2="122" y2="28" stroke-width="4"/>
+          <line x1="136" y1="58" x2="136" y2="36" stroke-width="3.5"/>
+          <line x1="150" y1="58" x2="150" y2="46" stroke-width="2.5"/>
+        </g>
+        <!-- wordmark -->
+        <text x="140" y="62" text-anchor="middle"
+              font-family="Segoe UI, Arial, sans-serif"
+              font-size="42" font-weight="700" fill="#ffffff">PAMSI</text>
+        <text x="140" y="82" text-anchor="middle"
+              font-family="Segoe UI, Arial, sans-serif"
+              font-size="11" fill="#a0aec0">Peptide Atlas for MS Imaging</text>
+      </svg>
+    </a>
   </div>
 
   <!-- About -->
@@ -273,7 +308,7 @@
         The current release (v1.0-data) contains high-quality peptide-spectrum matches (PSMs) and annotated fragment ions from:
       </p>
       <ul>
-        <li><strong>Human Breast Cancer (Triple Negative)</strong> — 112 tissue samples</li>
+        <li><strong>Human Breast Cancer (Triple Negative)</strong> — 60 tissue samples</li>
         <li><strong>Mouse Cochlea</strong> — 16 samples</li>
       </ul>
       <p>
@@ -334,28 +369,28 @@
           </thead>
           <tbody>
             <tr style="border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 0.7rem 1rem;"><strong>HumanBreast_Phase2_psm_best.tsv</strong></td>
+              <td style="padding: 0.7rem 1rem;"><strong>HumanBreast_psm_best.tsv</strong></td>
               <td style="padding: 0.7rem 1rem;">Human TNBC – best PSM table</td>
               <td style="padding: 0.7rem 1rem;">316 MB</td>
-              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_Phase2_psm_best.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_psm_best.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
             </tr>
             <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
-              <td style="padding: 0.7rem 1rem;"><strong>HumanBreast_Phase2_fragments.tsv.zip</strong></td>
+              <td style="padding: 0.7rem 1rem;"><strong>HumanBreast_fragments.tsv.zip</strong></td>
               <td style="padding: 0.7rem 1rem;">Human TNBC – annotated fragments (zipped)</td>
               <td style="padding: 0.7rem 1rem;">117 MB</td>
-              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_Phase2_fragments.tsv.zip" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_fragments.tsv.zip" style="color:#2b6cb0; font-weight:600;">Download</a></td>
             </tr>
             <tr style="border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 0.7rem 1rem;"><strong>MouseCochlea_Phase2_psm_best.tsv</strong></td>
+              <td style="padding: 0.7rem 1rem;"><strong>Mousecochlea_psm_best.tsv</strong></td>
               <td style="padding: 0.7rem 1rem;">Mouse Cochlea – best PSM table</td>
               <td style="padding: 0.7rem 1rem;">42.8 MB</td>
-              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/MouseCochlea_Phase2_psm_best.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/Mousecochlea_psm_best.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
             </tr>
             <tr style="background: #f8fafc;">
-              <td style="padding: 0.7rem 1rem;"><strong>MouseCochlea_Phase2_fragments.tsv</strong></td>
+              <td style="padding: 0.7rem 1rem;"><strong>Mousecochlea_fragments.tsv</strong></td>
               <td style="padding: 0.7rem 1rem;">Mouse Cochlea – annotated fragments</td>
               <td style="padding: 0.7rem 1rem;">342 MB</td>
-              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/MouseCochlea_Phase2_fragments.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/Mousecochlea_fragments.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
             </tr>
           </tbody>
         </table>
@@ -440,9 +475,9 @@
     new Chart(ctx, {
       type: 'pie',
       data: {
-        labels: ['Human TNBC (112 samples)', 'Mouse Cochlea (16 samples)'],
+        labels: ['Human TNBC (60 samples)', 'Mouse Cochlea (16 samples)'],
         datasets: [{
-          data: [112, 16],
+          data: [60, 16],
           backgroundColor: ['#2b6cb0', '#48bb78'],
           borderWidth: 2,
           borderColor: '#fff'
