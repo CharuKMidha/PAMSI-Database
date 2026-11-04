@@ -1,408 +1,560 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import zipfile
-from pathlib import Path
-import urllib.request
-import plotly.graph_objects as go
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAMSI Atlas Home</title>
+  <meta name="description" content="PAMSI — Peptide Atlas for Mass Spectrometry Imaging of Extracellular Matrix Proteome" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy: #1a365d;
+      --dark-navy: #0f2744;
+      --header-bg: #ffffff;
+      --header-text: #1a365d;
+      --yellow: #f1c40f;
+      --beige: #f5f0e6;
+      --light-blue: #d6e4f0;
+      --text: #1a365d;
+      --muted: #4a5568;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      background: #fff;
+    }
 
-# ================== PAGE CONFIG (must be first Streamlit call) ==================
-st.set_page_config(
-    page_title="PAMSI — Private Peptide Atlas",
-    page_icon="🧬",
-    layout="wide",
-)
+    /* ========== HEADER ========== */
+    .top-banner {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1.15rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 100;
+      gap: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .top-banner h1 {
+      font-size: 2.45rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      margin: 0 auto;
+      text-align: center;
+      flex: 1;
+      color: var(--navy);
+    }
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--navy);
+      font-size: 1.7rem;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      line-height: 1;
+      opacity: 0.95;
+    }
+    .menu-btn:hover { opacity: 1; }
 
-# ================== HEADER ==================
-LOGO = Path("assets/PAMSIlogotransparent2.png")
-col_logo, col_title = st.columns([1, 5])
-with col_logo:
-    if LOGO.exists():
-        st.image(str(LOGO), width=140)
-with col_title:
-    st.title("PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
-    st.caption(
-        "MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • "
-        "Human + Mouse datasets • Private Access"
-    )
+    .header-logo {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .header-logo img {
+      height: 72px;
+      width: auto;
+      display: block;
+    }
 
-# ================== PASSWORD PROTECTION ==================
-if "password_correct" not in st.session_state:
-    st.session_state.password_correct = False
+    /* ========== SIDE MENU ========== */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 270px;
+      height: 100%;
+      background: #f8f9fa;
+      box-shadow: 4px 0 18px rgba(0,0,0,0.18);
+      z-index: 200;
+      transition: left 0.28s ease;
+      overflow-y: auto;
+      font-size: 0.98rem;
+    }
+    .side-menu.open { left: 0; }
+    .side-menu-header {
+      background: var(--navy);
+      color: white;
+      padding: 1.1rem 1.25rem;
+      font-weight: 600;
+      font-size: 1.05rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .side-menu-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .side-menu nav { padding: 0.75rem 0; }
+    .side-menu a {
+      display: block;
+      padding: 0.7rem 1.4rem;
+      color: #2c3e50;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .side-menu a:hover { background: #e9ecef; }
+    .side-menu .section-label {
+      padding: 0.9rem 1.4rem 0.35rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 150;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s;
+    }
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
 
+    /* ========== SECTIONS ========== */
+    section { padding: 2.5rem 2rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-title h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .section-bar {
+      width: 8px;
+      height: 32px;
+      background: var(--yellow);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
 
-def check_password():
-    password = st.text_input("Enter Collaborator Password", type="password")
-    if password == "PAMSI2026_Collab":  # ← CHANGE THIS TO YOUR OWN SECRET
-        st.session_state.password_correct = True
-        st.rerun()
-    elif password:
-        st.error("Incorrect password")
+    /* About */
+    .about { background: var(--beige); }
+    .about-lead {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 0.9rem;
+    }
+    .about-lead img {
+      height: 88px;
+      width: auto;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+    .about-lead p {
+      margin-bottom: 0;
+      max-width: 820px;
+      font-size: 1.05rem;
+    }
+    .about p { font-size: 1.05rem; max-width: 820px; margin-bottom: 0.9rem; }
+    .about ul { margin: 0.8rem 0 1rem 1.5rem; }
+    .about li { margin-bottom: 0.35rem; }
 
+    /* Explore */
+    .explore { background: var(--light-blue); }
+    .explore-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 700px) {
+      .explore-grid { grid-template-columns: 1fr; }
+      .about-lead { flex-direction: column; align-items: flex-start; }
+      .top-banner h1 { font-size: 1.5rem; }
+      .header-logo img { height: 52px; }
+    }
+    .explore-card {
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+      text-align: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .explore-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+    .explore-card a {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      padding: 1.75rem 1.25rem;
+    }
+    .explore-card h3 {
+      color: #2b6cb0;
+      font-size: 1.35rem;
+      margin-bottom: 0.6rem;
+    }
+    .explore-card p { color: var(--muted); font-size: 0.95rem; }
+    .explore-icon { font-size: 2.4rem; margin-bottom: 0.5rem; }
 
-if not st.session_state.password_correct:
-    check_password()
-    st.stop()
+    /* Current Libraries */
+    .libraries { background: var(--beige); }
+    .chart-container {
+      max-width: 420px;
+      margin: 1.5rem auto 0.5rem;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .library-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 0.75rem;
+    }
 
-# ================== PATHS / URLS (GitHub Release) ==================
-BASE_URL = "https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data"
-DATA_DIR = Path("data")
+    /* Publications & License */
+    .publications { background: var(--beige); }
+    .license { background: var(--light-blue); }
+    .publications p, .license p {
+      font-size: 1.05rem;
+      max-width: 820px;
+      margin-bottom: 0.85rem;
+    }
+    .license a { color: #2b6cb0; font-weight: 600; }
 
-DATASETS = {
-    "Human TNBC": {
-        "psm_url": f"{BASE_URL}/HumanBreast_psm_best.tsv",
-        "frag_url": f"{BASE_URL}/HumanBreast_fragments.tsv.zip",
-        "is_zipped": True,
-        "psm_local": DATA_DIR / "HumanBreast_psm_best.tsv",
-        "frag_tsv_local": DATA_DIR / "HumanBreast_fragments.tsv",
-        "frag_zip_local": DATA_DIR / "HumanBreast_fragments.tsv.zip",
-    },
-    "Mouse Cochlea": {
-        "psm_url": f"{BASE_URL}/Mousecochlea_psm_best.tsv",
-        "frag_url": f"{BASE_URL}/Mousecochlea_fragments.tsv",
-        "is_zipped": False,
-        "psm_local": DATA_DIR / "Mousecochlea_psm_best.tsv",
-        "frag_tsv_local": DATA_DIR / "Mousecochlea_fragments.tsv",
-        "frag_zip_local": None,
-    },
-}
+    /* Footer */
+    footer {
+      background: var(--dark-navy);
+      color: #e2e8f0;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+    footer .footer-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: white;
+    }
+    footer a { color: #90cdf4; }
+  </style>
+</head>
+<body>
 
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="side-menu-header">
+      <span>PAMSI Links</span>
+      <button class="side-menu-close" id="closeMenu" aria-label="Close menu">×</button>
+    </div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#libraries">Download Library</a>
+      <a href="https://pamsi-database-angellabsmusc-ckapil.streamlit.app" target="_blank" rel="noopener">Query Database</a>
+      <a href="#documentation">Documentation</a>
+    </nav>
+  </div>
+  <div class="overlay" id="overlay"></div>
 
-def download_with_ua(url: str, dest: Path):
-    """Download from GitHub Release with User-Agent (first run only)."""
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    if dest.exists() and dest.stat().st_size > 0:
-        return dest
-    req = urllib.request.Request(url, headers={"User-Agent": "PAMSI-Streamlit/1.0"})
-    with st.spinner(f"Downloading {dest.name} (first run only)…"):
-        with urllib.request.urlopen(req, timeout=600) as r, open(dest, "wb") as f:
-            while True:
-                chunk = r.read(1024 * 1024)
-                if not chunk:
-                    break
-                f.write(chunk)
-    return dest
+  <!-- Top Banner -->
+  <div class="top-banner">
+    <button class="menu-btn" id="openMenu" aria-label="Open menu">☰</button>
+    <h1>PAMSI Atlas Home</h1>
+    <a href="#" class="header-logo" aria-label="PAMSI home">
+      <img src="assets/PAMSIlogotransparent2.png"
+           alt="PAMSI — Peptide Atlas for MS Imaging" />
+    </a>
+  </div>
 
+  <!-- About -->
+  <section class="about">
+    <div class="section-inner">
+      <div class="section-title">
+        <div class="section-bar"></div>
+        <h2>About</h2>
+      </div>
+      <div class="about-lead">
+        <img src="assets/PAMSIlogotransparent2.png" alt="PAMSI logo" />
+        <p>
+          <strong>PAMSI</strong> is a private peptide atlas built for MALDI Imaging Mass Spectrometry data of the extracellular matrix proteome.
+          The current release (v1.0-data) contains high-quality peptide-spectrum matches (PSMs) and annotated fragment ions from:
+        </p>
+      </div>
+      <ul>
+        <li><strong>Human Breast Cancer (Triple Negative)</strong> — 60 tissue samples</li>
+        <li><strong>Mouse Cochlea</strong> — 16 samples</li>
+      </ul>
+      <p>
+        The interactive search engine allows mass-based querying (ppm tolerance), protein/gene filtering, and annotated spectrum viewing.
+        All PSM and fragment tables were processed with <strong>FragPipe 24.0</strong> (MSFragger).
+      </p>
+    </div>
+  </section>
 
-def ensure_fragments_tsv(dataset_name: str):
-    """Ensure the fragment TSV for a given dataset is on disk (on demand)."""
-    cfg = DATASETS[dataset_name]
-    frag_tsv = cfg["frag_tsv_local"]
+  <!-- Explore -->
+  <section class="explore">
+    <div class="section-inner">
+      <div class="section-title">
+        <div class="section-bar"></div>
+        <h2>Explore</h2>
+      </div>
+      <div class="explore-grid">
+        <div class="explore-card">
+          <a href="#libraries">
+            <div class="explore-icon">📥</div>
+            <h3>Download Library</h3>
+            <p>Download the current PAMSI database (PSM tables and annotated fragment ions) for Human TNBC and Mouse Cochlea.</p>
+          </a>
+        </div>
+        <div class="explore-card">
+          <a href="https://pamsi-database-angellabsmusc-ckapil.streamlit.app" target="_blank" rel="noopener">
+            <div class="explore-icon">🔍</div>
+            <h3>Query Database</h3>
+            <p>Open the PAMSI Search Engine to query by mass, protein/gene, and view annotated spectra.</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    if frag_tsv.exists() and frag_tsv.stat().st_size > 0:
-        return frag_tsv
+  <!-- Current Libraries -->
+  <section class="libraries" id="libraries">
+    <div class="section-inner">
+      <div class="section-title">
+        <div class="section-bar"></div>
+        <h2>Current Libraries</h2>
+      </div>
+      <div class="chart-container">
+        <canvas id="sampleChart" width="360" height="360"></canvas>
+      </div>
+      <p class="library-note">Sample distribution in PAMSI v1.0-data (total 76 samples)</p>
+      <div style="margin-top: 2rem; overflow-x: auto;">
+        <table style="width:100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+          <thead>
+            <tr style="background: var(--navy); color: white;">
+              <th style="padding: 0.75rem 1rem; text-align: left;">File</th>
+              <th style="padding: 0.75rem 1rem; text-align: left;">Description</th>
+              <th style="padding: 0.75rem 1rem; text-align: left;">Size</th>
+              <th style="padding: 0.75rem 1rem;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.7rem 1rem;"><strong>HumanBreast_psm_best.tsv</strong></td>
+              <td style="padding: 0.7rem 1rem;">Human TNBC – best PSM table</td>
+              <td style="padding: 0.7rem 1rem;">316 MB</td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_psm_best.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+              <td style="padding: 0.7rem 1rem;"><strong>HumanBreast_fragments.tsv.zip</strong></td>
+              <td style="padding: 0.7rem 1rem;">Human TNBC – annotated fragments (zipped)</td>
+              <td style="padding: 0.7rem 1rem;">117 MB</td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/HumanBreast_fragments.tsv.zip" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.7rem 1rem;"><strong>Mousecochlea_psm_best.tsv</strong></td>
+              <td style="padding: 0.7rem 1rem;">Mouse Cochlea – best PSM table</td>
+              <td style="padding: 0.7rem 1rem;">42.8 MB</td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/Mousecochlea_psm_best.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+            </tr>
+            <tr style="background: #f8fafc;">
+              <td style="padding: 0.7rem 1rem;"><strong>Mousecochlea_fragments.tsv</strong></td>
+              <td style="padding: 0.7rem 1rem;">Mouse Cochlea – annotated fragments</td>
+              <td style="padding: 0.7rem 1rem;">342 MB</td>
+              <td style="padding: 0.7rem 1rem;"><a href="https://github.com/CharuKMidha/PAMSI-Database/releases/download/v1.0-data/Mousecochlea_fragments.tsv" style="color:#2b6cb0; font-weight:600;">Download</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-    if cfg["is_zipped"]:
-        download_with_ua(cfg["frag_url"], cfg["frag_zip_local"])
-        with zipfile.ZipFile(cfg["frag_zip_local"], "r") as zf:
-            members = [m for m in zf.namelist() if m.lower().endswith((".tsv", ".csv", ".txt"))]
-            if not members:
-                members = zf.namelist()
-            if not members:
-                raise ValueError(f"Empty ZIP for {dataset_name}")
-            with zf.open(members[0]) as src, open(frag_tsv, "wb") as out:
-                while True:
-                    chunk = src.read(1024 * 1024)
-                    if not chunk:
-                        break
-                    out.write(chunk)
-    else:
-        download_with_ua(cfg["frag_url"], frag_tsv)
+  <!-- Documentation -->
+  <section class="publications" id="documentation">
+    <div class="section-inner">
+      <div class="section-title">
+        <div class="section-bar"></div>
+        <h2>Documentation</h2>
+      </div>
 
-    return frag_tsv
+      <h3 style="color: var(--navy); margin: 1rem 0 0.5rem; font-size: 1.15rem;">Data processing</h3>
+      <p>
+        PAMSI PSM and fragment ion tables were generated with <strong>FragPipe 24.0</strong> using MSFragger search.
+        Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation.
+      </p>
+      <p>
+        In the search engine Precursor table, numeric fields are shown with fixed precision:
+        <strong>Calculated.Peptide.Mass</strong> — 3 decimals;
+        <strong>Hyperscore</strong> — 2 decimals;
+        <strong>Calibrated.Observed.Mass</strong>, <strong>Calibrated.Observed.M.Z</strong>, and <strong>Calibrated.Observed.M+H</strong> — 4 decimals.
+      </p>
 
+      <h3 style="color: var(--navy); margin: 1.5rem 0 0.5rem; font-size: 1.15rem;">UNIMOD modification codes</h3>
+      <p>Common modification codes in the <code>Modified.Peptide.Unimod</code> column:</p>
+      <div style="overflow-x: auto; margin: 0.75rem 0 1rem;">
+        <table style="width:100%; max-width:640px; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+          <thead>
+            <tr style="background: var(--navy); color: white;">
+              <th style="padding: 0.65rem 1rem; text-align: left;">Code</th>
+              <th style="padding: 0.65rem 1rem; text-align: left;">Modification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:35</strong></td><td style="padding: 0.6rem 1rem;">Hydroxylation of Proline (oxidation)</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:7</strong></td><td style="padding: 0.6rem 1rem;">Deamidation</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:1</strong></td><td style="padding: 0.6rem 1rem;">Acetylation</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:4</strong></td><td style="padding: 0.6rem 1rem;">Carbamidomethyl</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:21</strong></td><td style="padding: 0.6rem 1rem;">Phosphorylation</td></tr>
+            <tr style="background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:34</strong></td><td style="padding: 0.6rem 1rem;">Methylation</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color: var(--muted); font-size: 0.95rem;">
+        Example: <code>P[UNIMOD:35]</code> denotes hydroxylated proline — common in extracellular matrix collagen peptides.
+      </p>
 
-@st.cache_data(show_spinner="Loading PSM tables…")
-def load_psm():
-    """Load and combine both Human and Mouse PSM tables."""
-    usecols = [
-        "Spectrum", "Peptide", "Modified.Peptide.Unimod", "Charge", "Retention",
-        "Calibrated.Observed.Mass", "Calibrated.Observed.M.Z",
-        "Calculated.Peptide.Mass", "Calculated.M.Z", "Calibrated.Observed.M+H",
-        "Hyperscore", "Probability", "Intensity", "Ion.Mobility",
-        "Protein", "Gene", "Protein.Description", "Precursor", "USI",
-        "Tissue", "Organism", "InstrumentModel", "ExperimentID",
-    ]
+      <h3 style="color: var(--navy); margin: 1.5rem 0 0.5rem; font-size: 1.15rem;">Spectrum viewer — zoom &amp; pan</h3>
+      <p>In the PAMSI Search Engine spectrum viewer:</p>
+      <ul style="margin: 0.5rem 0 1rem 1.5rem;">
+        <li><strong>Scroll</strong> on the plot to zoom in or out</li>
+        <li><strong>Click and drag</strong> to pan across m/z</li>
+        <li><strong>Double-click</strong> the plot to reset zoom</li>
+        <li><strong>Hover</strong> a peak to see ion label, m/z, and intensity</li>
+      </ul>
+      <p style="color: var(--muted); font-size: 0.95rem;">
+        Ion labels (b/y) are angled to reduce overlap. Open <strong>Query Database</strong> to use the interactive viewer.
+      </p>
+    </div>
+  </section>
 
-    dfs = []
-    for exp_name, cfg in DATASETS.items():
-        download_with_ua(cfg["psm_url"], cfg["psm_local"])
-        df_part = pd.read_csv(cfg["psm_local"], sep="\t", usecols=lambda c: c in usecols)
-        df_part["Experiment_Table"] = exp_name
-        dfs.append(df_part)
+  <!-- Publications -->
+  <section class="publications">
+    <div class="section-inner">
+      <div class="section-title">
+        <div class="section-bar"></div>
+        <h2>Publications</h2>
+      </div>
+      <p>
+        A publication describing the PAMSI Atlas is in progress. For now, please use the reference URL
+        <a href="https://charukmidha.github.io/PAMSI-Database/" style="color:#2b6cb0; font-weight:600;">https://charukmidha.github.io/PAMSI-Database/</a>
+        for citing, and check back later for its publication.
+      </p>
+    </div>
+  </section>
 
-    return pd.concat(dfs, ignore_index=True)
+  <!-- License -->
+  <section class="license">
+    <div class="section-inner">
+      <div class="section-title">
+        <div class="section-bar"></div>
+        <h2>License</h2>
+      </div>
+      <p>
+        PAMSI Atlas database are provided to the community under the
+        <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC 4.0 license</a>.
+      </p>
+      <p>
+        When using these data for academic purposes, please acknowledge PAMSI Atlas by citing this website.
+      </p>
+      <p>
+        If you wish to use PAMSI Atlas database for commercial purposes, please contact Prof. Peggi Angel for details.
+      </p>
+    </div>
+  </section>
 
+  <!-- Footer -->
+  <footer>
+    <div class="footer-title">PAMSI Atlas</div>
+    <div>© 2026 MUSC, All rights reserved</div>
+    <div style="margin-top: 0.8rem; max-width: 720px; margin-left: auto; margin-right: auto;">
+      PAMSI database are provided to the community under the
+      <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC 4.0 license</a>.
+      When using these data for academic purposes, please acknowledge PAMSI Atlas by citing this website.
+      If you wish to use PAMSI Atlas database for commercial purposes, please contact Prof. Peggi Angel for details.
+    </div>
+  </footer>
 
-def load_frags_for_usi(usi: str, experiment: str) -> pd.DataFrame:
-    """Load only fragment rows for one USI from the correct dataset file."""
-    path = ensure_fragments_tsv(experiment)
-    usecols = ["USI", "Ion_Label", "Ion_mz", "Ion_Intensity", "Peptide", "Precursor"]
-    parts = []
-    for chunk in pd.read_csv(path, sep="\t", usecols=lambda c: c in usecols, chunksize=200_000):
-        hit = chunk[chunk["USI"] == usi]
-        if not hit.empty:
-            parts.append(hit)
-    if not parts:
-        return pd.DataFrame(columns=usecols)
-    return pd.concat(parts, ignore_index=True)
+  <script>
+    const sideMenu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('overlay');
+    const openBtn = document.getElementById('openMenu');
+    const closeBtn = document.getElementById('closeMenu');
 
+    function openMenu() {
+      sideMenu.classList.add('open');
+      overlay.classList.add('show');
+    }
+    function closeMenu() {
+      sideMenu.classList.remove('open');
+      overlay.classList.remove('show');
+    }
 
-# ---- Startup: load combined PSM only (fragments load on demand) ----
-try:
-    df = load_psm()
-except Exception as e:
-    st.error("Failed to prepare PAMSI data from GitHub Release.")
-    st.exception(e)
-    st.stop()
+    openBtn.addEventListener('click', openMenu);
+    closeBtn.addEventListener('click', closeMenu);
+    overlay.addEventListener('click', closeMenu);
 
-exp_options = sorted(df["Experiment_Table"].dropna().unique().tolist())
+    sideMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
 
-# ================== SIDEBAR FILTERS ==================
-st.sidebar.header("🔎 PAMSI Search Controls")
-
-st.sidebar.subheader("Target Calibrated Observed Mass + H values")
-mass_input = st.sidebar.text_area(
-    "Enter mass (Add m/z here in comma-separated or one per line)",
-    value="",
-    height=100,
-    help="Paste a list with commas or one mass per line (from Calibrated.Observed.M+H)",
-)
-
-ppm_tolerance = st.sidebar.number_input(
-    "Tolerance (ppm)", min_value=0, max_value=1000, value=15, step=1
-)
-
-experiments = st.sidebar.multiselect(
-    "Experiments",
-    options=exp_options,
-    default=exp_options,
-)
-
-protein_filter = st.sidebar.text_input("Filter by Protein / Gene ID (e.g. COL1A1, CO1A1)")
-
-# ================== SEARCH ==================
-if st.sidebar.button("🔍 Search", type="primary", use_container_width=True):
-    with st.spinner("Searching PAMSI database…"):
-        targets = []
-        if mass_input.strip():
-            raw = [x.strip() for x in mass_input.replace("\n", ",").split(",")]
-            for x in raw:
-                try:
-                    targets.append(float(x))
-                except ValueError:
-                    pass
-
-        mask = df["Experiment_Table"].isin(experiments)
-
-        if targets and "Calibrated.Observed.M+H" in df.columns:
-            mass_col = df["Calibrated.Observed.M+H"].astype(float).values
-            mass_mask = np.zeros(len(df), dtype=bool)
-            for t in targets:
-                window = t * ppm_tolerance / 1e6
-                mass_mask |= (mass_col >= t - window) & (mass_col <= t + window)
-            mask &= mass_mask
-
-        if protein_filter.strip():
-            pf = protein_filter.strip()
-            mask &= (
-                df["Protein"].fillna("").astype(str).str.contains(pf, case=False)
-                | df["Gene"].fillna("").astype(str).str.contains(pf, case=False)
-            )
-
-        filtered = df[mask].copy()
-        st.session_state["filtered"] = filtered
-        st.session_state["targets"] = targets
-        st.session_state["ppm"] = ppm_tolerance
-
-# ================== RESULTS + SPECTRUM VIEWER ==================
-if "filtered" in st.session_state:
-    filtered = st.session_state["filtered"]
-    targets = st.session_state.get("targets", [])
-    ppm = st.session_state.get("ppm", 15)
-
-    if len(filtered) == 0:
-        searched = [f"{t:.4f} ±{ppm} ppm" for t in targets]
-        st.warning(
-            f"**No matches** for the {len(targets)} mass(es).\n\n"
-            f"Searched: {', '.join(searched) if searched else '(none)'}"
-        )
-        st.info("Tip: Increase ppm tolerance, try different masses, or clear the protein filter.")
-    else:
-        st.success(
-            f"**{len(filtered):,} peptides** found "
-            f"({len(targets)} mass(es) at ±{ppm} ppm)"
-        )
-
-        st.subheader("📊 Peptide Hits by Experiment / Tissue")
-        tissue_counts = filtered["Experiment_Table"].value_counts().reset_index()
-        tissue_counts.columns = ["Tissue", "Peptide Count"]
-
-        fig_bar = go.Figure(
-            data=[
-                go.Bar(
-                    x=tissue_counts["Tissue"],
-                    y=tissue_counts["Peptide Count"],
-                    marker_color="#1f77b4",
-                    text=tissue_counts["Peptide Count"],
-                    textposition="outside",
-                    textfont=dict(size=14, color="black"),
-                )
-            ]
-        )
-        fig_bar.update_layout(
-            xaxis_title="Experiment / Tissue",
-            yaxis_title="Peptide Count",
-            template="plotly_white",
-            height=350,
-            showlegend=False,
-            font=dict(size=14, color="black"),
-            xaxis=dict(
-                title_font=dict(size=16, color="black"),
-                tickfont=dict(size=14, color="black"),
-            ),
-            yaxis=dict(
-                title_font=dict(size=16, color="black"),
-                tickfont=dict(size=14, color="black"),
-            ),
-            title_font=dict(size=16, color="black"),
-            margin=dict(t=40, b=60),
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-        display_cols = [
-            "Calibrated.Observed.M+H", "Calibrated.Observed.Mass", "Modified.Peptide.Unimod",
-            "Charge", "Hyperscore", "Ion.Mobility", "Experiment_Table", "Tissue",
-            "Peptide", "Protein", "Gene", "Protein.Description", "USI",
-        ]
-        display_cols = [c for c in display_cols if c in filtered.columns]
-
-        st.subheader("Precursor table")
-        st.dataframe(
-            filtered[display_cols],
-            use_container_width=True,
-            hide_index=True,
-            height=350,
-        )
-
-        st.download_button(
-            label="📥 Download results as CSV",
-            data=filtered[display_cols].to_csv(index=False).encode(),
-            file_name=f"pamsi_results_±{ppm}ppm.csv",
-            mime="text/csv",
-        )
-
-        # ========== SPECTRUM VIEWER ==========
-        st.markdown("---")
-        st.subheader("🔬 Spectrum Viewer (annotated fragments)")
-
-        usi_map = {}
-        usi_to_experiment = {}
-        for _, row in filtered.drop_duplicates(subset=["USI"]).iterrows():
-            usi = row["USI"]
-            precursor = str(row.get("Precursor", ""))
-            peptide = str(row.get("Peptide", ""))
-            hyperscore = row.get("Hyperscore", "")
-            exp = row.get("Experiment_Table", "Human TNBC")
-            label = f"{exp} | {precursor}  |  {peptide}  (score: {hyperscore})"
-            usi_map[label] = usi
-            usi_to_experiment[usi] = exp
-
-        if not usi_map:
-            st.info("No peptides available in the current result set.")
-        else:
-            selected_label = st.selectbox(
-                "Select a peptide to view its spectrum",
-                options=list(usi_map.keys()),
-                help="Showing: Experiment | Precursor | Peptide sequence (Hyperscore)",
-            )
-            selected_usi = usi_map[selected_label]
-            selected_exp = usi_to_experiment[selected_usi]
-
-            with st.spinner(f"Loading fragments for selected peptide from {selected_exp}…"):
-                frags = load_frags_for_usi(selected_usi, selected_exp)
-
-            if frags.empty:
-                st.warning("No fragment ions found for the selected peptide.")
-            else:
-                meta = filtered[filtered["USI"] == selected_usi].iloc[0]
-                st.markdown(
-                    f"**Experiment:** `{meta.get('Experiment_Table', '')}` &nbsp;|&nbsp; "
-                    f"**Peptide:** `{meta.get('Peptide', '')}` &nbsp;|&nbsp; "
-                    f"**Precursor:** `{meta.get('Precursor', '')}` &nbsp;|&nbsp; "
-                    f"**Protein:** `{meta.get('Protein', '')}` &nbsp;|&nbsp; "
-                    f"**Hyperscore:** {meta.get('Hyperscore', 'N/A')}"
-                )
-
-                fig = go.Figure()
-                fig.add_trace(
-                    go.Scatter(
-                        x=frags["Ion_mz"],
-                        y=frags["Ion_Intensity"],
-                        mode="markers",
-                        marker=dict(size=8, color="#1f77b4"),
-                        hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
-                        text=frags["Ion_Label"],
-                        name="Annotated ions",
-                    )
-                )
-                for _, row in frags.iterrows():
-                    fig.add_shape(
-                        type="line",
-                        x0=row["Ion_mz"],
-                        x1=row["Ion_mz"],
-                        y0=0,
-                        y1=row["Ion_Intensity"],
-                        line=dict(color="rgba(31,119,180,0.4)", width=1),
-                    )
-                for _, row in frags.iterrows():
-                    fig.add_annotation(
-                        x=row["Ion_mz"],
-                        y=row["Ion_Intensity"],
-                        text=str(row["Ion_Label"]),
-                        showarrow=False,
-                        textangle=-90,
-                        font=dict(size=12, color="black"),
-                        xanchor="left",
-                        yanchor="bottom",
-                        yshift=4,
-                    )
-
-                fig.update_layout(
-                    title=f"Annotated Spectrum – {meta.get('Precursor', '')} ({selected_exp})",
-                    xaxis_title="m/z",
-                    yaxis_title="Intensity",
-                    template="plotly_white",
-                    height=500,
-                    showlegend=False,
-                    hovermode="closest",
-                    font=dict(size=14, color="black"),
-                    xaxis=dict(
-                        title_font=dict(size=16, color="black"),
-                        tickfont=dict(size=14, color="black"),
-                    ),
-                    yaxis=dict(
-                        title_font=dict(size=16, color="black"),
-                        tickfont=dict(size=14, color="black"),
-                        range=[0, float(frags["Ion_Intensity"].max()) * 1.35],
-                    ),
-                    title_font=dict(size=16, color="black"),
-                )
-                st.plotly_chart(fig, use_container_width=True)
-
-                with st.expander("Fragment ion table"):
-                    st.dataframe(
-                        frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
-                        use_container_width=True,
-                        hide_index=True,
-                    )
-else:
-    st.info(
-        "Adjust parameters on the left and click **🔍 Search** to query the PAMSI database "
-        "and open the spectrum viewer."
-    )
-
-st.caption(
-    "✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • "
-    "USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026"
-)
+    const ctx = document.getElementById('sampleChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Human TNBC (60 samples)', 'Mouse Cochlea (16 samples)'],
+        datasets: [{
+          data: [60, 16],
+          backgroundColor: ['#2b6cb0', '#48bb78'],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { font: { size: 13 }, padding: 16 }
+          },
+          title: {
+            display: true,
+            text: 'PAMSI v1.0-data Sample Composition',
+            font: { size: 15, weight: '600' },
+            color: '#1a365d',
+            padding: { bottom: 12 }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
