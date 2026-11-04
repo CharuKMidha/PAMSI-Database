@@ -6,29 +6,30 @@ from pathlib import Path
 import urllib.request
 import plotly.graph_objects as go
 
+# ================== PAGE CONFIG (must be first Streamlit call) ==================
 st.set_page_config(
     page_title="PAMSI — Private Peptide Atlas",
-    page_icon="assets/PAMSIlogotransparent2.png",  # optional; needs file in repo
+    page_icon="🧬",
     layout="wide",
 )
 
-# Header: logo + title  (AFTER set_page_config)
+# ================== HEADER ==================
+LOGO = Path("assets/PAMSIlogotransparent2.png")
 col_logo, col_title = st.columns([1, 5])
 with col_logo:
-    st.image("assets/PAMSIlogotransparent2.png", width=140)
+    if LOGO.exists():
+        st.image(str(LOGO), width=140)
 with col_title:
     st.title("PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
     st.caption(
         "MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • "
         "Human + Mouse datasets • Private Access"
     )
-#st.set_page_config(page_title="PAMSI — Private Peptide Atlas", layout="wide")
-#st.title("🧬 PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
-#st.caption("MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • Human + Mouse datasets • Private Access")
 
 # ================== PASSWORD PROTECTION ==================
 if "password_correct" not in st.session_state:
     st.session_state.password_correct = False
+
 
 def check_password():
     password = st.text_input("Enter Collaborator Password", type="password")
@@ -37,6 +38,7 @@ def check_password():
         st.rerun()
     elif password:
         st.error("Incorrect password")
+
 
 if not st.session_state.password_correct:
     check_password()
@@ -61,11 +63,10 @@ DATASETS = {
         "is_zipped": False,
         "psm_local": DATA_DIR / "Mousecochlea_psm_best.tsv",
         "frag_tsv_local": DATA_DIR / "Mousecochlea_fragments.tsv",
-        "frag_zip_local": None,   # not used for Mouse
+        "frag_zip_local": None,
     },
 }
 
-DATA_DIR = Path("data")
 
 def download_with_ua(url: str, dest: Path):
     """Download from GitHub Release with User-Agent (first run only)."""
@@ -82,8 +83,9 @@ def download_with_ua(url: str, dest: Path):
                 f.write(chunk)
     return dest
 
+
 def ensure_fragments_tsv(dataset_name: str):
-    """Ensure the fragment TSV for a given dataset is on disk."""
+    """Ensure the fragment TSV for a given dataset is on disk (on demand)."""
     cfg = DATASETS[dataset_name]
     frag_tsv = cfg["frag_tsv_local"]
 
@@ -91,7 +93,6 @@ def ensure_fragments_tsv(dataset_name: str):
         return frag_tsv
 
     if cfg["is_zipped"]:
-        # Human: download zip → extract
         download_with_ua(cfg["frag_url"], cfg["frag_zip_local"])
         with zipfile.ZipFile(cfg["frag_zip_local"], "r") as zf:
             members = [m for m in zf.namelist() if m.lower().endswith((".tsv", ".csv", ".txt"))]
@@ -106,10 +107,10 @@ def ensure_fragments_tsv(dataset_name: str):
                         break
                     out.write(chunk)
     else:
-        # Mouse: direct TSV download
         download_with_ua(cfg["frag_url"], frag_tsv)
 
     return frag_tsv
+
 
 @st.cache_data(show_spinner="Loading PSM tables…")
 def load_psm():
@@ -120,17 +121,18 @@ def load_psm():
         "Calculated.Peptide.Mass", "Calculated.M.Z", "Calibrated.Observed.M+H",
         "Hyperscore", "Probability", "Intensity", "Ion.Mobility",
         "Protein", "Gene", "Protein.Description", "Precursor", "USI",
-        "Tissue", "Organism", "InstrumentModel", "ExperimentID"
+        "Tissue", "Organism", "InstrumentModel", "ExperimentID",
     ]
 
     dfs = []
     for exp_name, cfg in DATASETS.items():
         download_with_ua(cfg["psm_url"], cfg["psm_local"])
-        df = pd.read_csv(cfg["psm_local"], sep="\t", usecols=lambda c: c in usecols)
-        df["Experiment_Table"] = exp_name
-        dfs.append(df)
+        df_part = pd.read_csv(cfg["psm_local"], sep="\t", usecols=lambda c: c in usecols)
+        df_part["Experiment_Table"] = exp_name
+        dfs.append(df_part)
 
     return pd.concat(dfs, ignore_index=True)
+
 
 def load_frags_for_usi(usi: str, experiment: str) -> pd.DataFrame:
     """Load only fragment rows for one USI from the correct dataset file."""
@@ -145,16 +147,14 @@ def load_frags_for_usi(usi: str, experiment: str) -> pd.DataFrame:
         return pd.DataFrame(columns=usecols)
     return pd.concat(parts, ignore_index=True)
 
-# ---- Startup: load combined PSM + prepare fragment files ----
-#try:
- #   df = load_psm()
-  #  # Pre-download both fragment files (so they are ready when user selects a peptide)
-   # for exp_name in DATASETS:
-    #    ensure_fragments_tsv(exp_name)
-#except Exception as e:
- #   st.error("Failed to prepare PAMSI data from GitHub Release.")
-  #  st.exception(e)
-   # st.stop()
+
+# ---- Startup: load combined PSM only (fragments load on demand) ----
+try:
+    df = load_psm()
+except Exception as e:
+    st.error("Failed to prepare PAMSI data from GitHub Release.")
+    st.exception(e)
+    st.stop()
 
 exp_options = sorted(df["Experiment_Table"].dropna().unique().tolist())
 
@@ -166,7 +166,7 @@ mass_input = st.sidebar.text_area(
     "Enter mass (Add m/z here in comma-separated or one per line)",
     value="",
     height=100,
-    help="Paste a list with commas or one mass per line (from Calibrated.Observed.M+H)"
+    help="Paste a list with commas or one mass per line (from Calibrated.Observed.M+H)",
 )
 
 ppm_tolerance = st.sidebar.number_input(
@@ -176,7 +176,7 @@ ppm_tolerance = st.sidebar.number_input(
 experiments = st.sidebar.multiselect(
     "Experiments",
     options=exp_options,
-    default=exp_options
+    default=exp_options,
 )
 
 protein_filter = st.sidebar.text_input("Filter by Protein / Gene ID (e.g. COL1A1, CO1A1)")
@@ -206,8 +206,8 @@ if st.sidebar.button("🔍 Search", type="primary", use_container_width=True):
         if protein_filter.strip():
             pf = protein_filter.strip()
             mask &= (
-                df["Protein"].fillna("").astype(str).str.contains(pf, case=False) |
-                df["Gene"].fillna("").astype(str).str.contains(pf, case=False)
+                df["Protein"].fillna("").astype(str).str.contains(pf, case=False)
+                | df["Gene"].fillna("").astype(str).str.contains(pf, case=False)
             )
 
         filtered = df[mask].copy()
@@ -237,7 +237,7 @@ if "filtered" in st.session_state:
         st.subheader("📊 Peptide Hits by Experiment / Tissue")
         tissue_counts = filtered["Experiment_Table"].value_counts().reset_index()
         tissue_counts.columns = ["Tissue", "Peptide Count"]
-        
+
         fig_bar = go.Figure(
             data=[
                 go.Bar(
@@ -271,9 +271,9 @@ if "filtered" in st.session_state:
         st.plotly_chart(fig_bar, use_container_width=True)
 
         display_cols = [
-            "Calibrated.Observed.M+H", "Calibrated.Observed.Mass", "Modified.Peptide.Unimod", "Charge", 
-            "Hyperscore", "Ion.Mobility","Experiment_Table", "Tissue",
-            "Peptide", "Protein", "Gene", "Protein.Description", "USI"
+            "Calibrated.Observed.M+H", "Calibrated.Observed.Mass", "Modified.Peptide.Unimod",
+            "Charge", "Hyperscore", "Ion.Mobility", "Experiment_Table", "Tissue",
+            "Peptide", "Protein", "Gene", "Protein.Description", "USI",
         ]
         display_cols = [c for c in display_cols if c in filtered.columns]
 
@@ -282,14 +282,14 @@ if "filtered" in st.session_state:
             filtered[display_cols],
             use_container_width=True,
             hide_index=True,
-            height=350
+            height=350,
         )
 
         st.download_button(
             label="📥 Download results as CSV",
             data=filtered[display_cols].to_csv(index=False).encode(),
             file_name=f"pamsi_results_±{ppm}ppm.csv",
-            mime="text/csv"
+            mime="text/csv",
         )
 
         # ========== SPECTRUM VIEWER ==========
@@ -314,7 +314,7 @@ if "filtered" in st.session_state:
             selected_label = st.selectbox(
                 "Select a peptide to view its spectrum",
                 options=list(usi_map.keys()),
-                help="Showing: Experiment | Precursor | Peptide sequence (Hyperscore)"
+                help="Showing: Experiment | Precursor | Peptide sequence (Hyperscore)",
             )
             selected_usi = usi_map[selected_label]
             selected_exp = usi_to_experiment[selected_usi]
@@ -335,37 +335,39 @@ if "filtered" in st.session_state:
                 )
 
                 fig = go.Figure()
-                # Peaks only
-                fig.add_trace(go.Scatter(
-                    x=frags["Ion_mz"],
-                    y=frags["Ion_Intensity"],
-                    mode="markers",
-                    marker=dict(size=8, color="#1f77b4"),
-                    hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
-                    text=frags["Ion_Label"],
-                    name="Annotated ions"))
-                # Stem lines
+                fig.add_trace(
+                    go.Scatter(
+                        x=frags["Ion_mz"],
+                        y=frags["Ion_Intensity"],
+                        mode="markers",
+                        marker=dict(size=8, color="#1f77b4"),
+                        hovertemplate="<b>%{text}</b><br>m/z: %{x:.4f}<br>Intensity: %{y}<extra></extra>",
+                        text=frags["Ion_Label"],
+                        name="Annotated ions",
+                    )
+                )
                 for _, row in frags.iterrows():
                     fig.add_shape(
                         type="line",
-                        x0=row["Ion_mz"], x1=row["Ion_mz"],
-                        y0=0, y1=row["Ion_Intensity"],
-                        line=dict(color="rgba(31,119,180,0.4)", width=1)
+                        x0=row["Ion_mz"],
+                        x1=row["Ion_mz"],
+                        y0=0,
+                        y1=row["Ion_Intensity"],
+                        line=dict(color="rgba(31,119,180,0.4)", width=1),
                     )
-                # Angled ion labels
                 for _, row in frags.iterrows():
                     fig.add_annotation(
                         x=row["Ion_mz"],
                         y=row["Ion_Intensity"],
                         text=str(row["Ion_Label"]),
                         showarrow=False,
-                        textangle=-90,
+                        textangle=-45,
                         font=dict(size=12, color="black"),
                         xanchor="left",
                         yanchor="bottom",
                         yshift=4,
                     )
-                    
+
                 fig.update_layout(
                     title=f"Annotated Spectrum – {meta.get('Precursor', '')} ({selected_exp})",
                     xaxis_title="m/z",
@@ -392,9 +394,15 @@ if "filtered" in st.session_state:
                     st.dataframe(
                         frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
                         use_container_width=True,
-                        hide_index=True
+                        hide_index=True,
                     )
 else:
-    st.info("Adjust parameters on the left and click **🔍 Search** to query the PAMSI database and open the spectrum viewer.")
+    st.info(
+        "Adjust parameters on the left and click **🔍 Search** to query the PAMSI database "
+        "and open the spectrum viewer."
+    )
 
-st.caption("✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026")
+st.caption(
+    "✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • "
+    "USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026"
+)
