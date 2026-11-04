@@ -6,9 +6,26 @@ from pathlib import Path
 import urllib.request
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="PAMSI — Private Peptide Atlas", layout="wide")
-st.title("🧬 PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
-st.caption("MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • Human + Mouse datasets • Private Access")
+st.set_page_config(
+    page_title="PAMSI — Private Peptide Atlas",
+    page_icon="assets/PAMSIlogo.png",   # browser tab icon
+    layout="wide",
+)
+
+# Header: logo + title
+col_logo, col_title = st.columns([1, 5])
+with col_logo:
+    st.image("assets/PAMSIlogo.png", width=140)
+with col_title:
+    st.title("PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
+    st.caption(
+        "MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • "
+        "Human + Mouse datasets • Private Access"
+    )
+
+#st.set_page_config(page_title="PAMSI — Private Peptide Atlas", layout="wide")
+#st.title("🧬 PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
+#st.caption("MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • Human + Mouse datasets • Private Access")
 
 # ================== PASSWORD PROTECTION ==================
 if "password_correct" not in st.session_state:
