@@ -361,7 +361,7 @@ if "filtered" in st.session_state:
                         y=row["Ion_Intensity"],
                         text=str(row["Ion_Label"]),
                         showarrow=False,
-                        textangle=-45,
+                        textangle=-90,
                         font=dict(size=12, color="black"),
                         xanchor="left",
                         yanchor="bottom",
