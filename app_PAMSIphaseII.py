@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="PAMSI — Private Peptide Atlas",
-    page_icon="assets/PAMSIlogo.png",   # browser tab icon
+    page_icon="assets/PAMSIlogotransparent2.png",   # browser tab icon
     layout="wide",
 )
 
