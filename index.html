@@ -61,6 +61,7 @@
     }
     .menu-btn:hover { opacity: 1; }
 
+    /* Logo on the top right */
     .header-logo {
       flex-shrink: 0;
       display: flex;
@@ -280,16 +281,17 @@
       <a href="#">Home</a>
       <a href="#libraries">Download Library</a>
       <a href="https://pamsi-database-angellabsmusc-ckapil.streamlit.app" target="_blank" rel="noopener">Query Database</a>
+      <a href="#documentation">Documentation</a>
     </nav>
   </div>
   <div class="overlay" id="overlay"></div>
 
-  <!-- Top Banner -->
+  <!-- Top Banner (white bar, navy title, larger logo) -->
   <div class="top-banner">
     <button class="menu-btn" id="openMenu" aria-label="Open menu">☰</button>
     <h1>PAMSI Atlas Home</h1>
     <a href="#" class="header-logo" aria-label="PAMSI home">
-      <img src="assets/MUSC_Health_Logo_Blue.png"
+      <img src="assets/PAMSIlogotransparent2.png"
            alt="PAMSI — Peptide Atlas for MS Imaging" />
     </a>
   </div>
@@ -314,6 +316,7 @@
       </ul>
       <p>
         The interactive search engine allows mass-based querying (ppm tolerance), protein/gene filtering, and annotated spectrum viewing.
+        All PSM and fragment tables were processed with <strong>FragPipe 24.0</strong> (MSFragger).
       </p>
     </div>
   </section>
@@ -393,6 +396,130 @@
           </tbody>
         </table>
       </div>
+
+      <p style="margin-top: 1.5rem; max-width: 820px;">
+        Files were searched with <strong>FragPipe 24.0</strong> (MSFragger) and pre-processed with an in-house R script
+        available on
+        <a href="https://github.com/CharuKMidha/PAMSI-Database" style="color:#2b6cb0; font-weight:600;" target="_blank" rel="noopener">GitHub (PAMSI-Database)</a>.
+        Modified residues may appear as mass tags (e.g. <code>N[115]</code>) or as UNIMOD annotations (e.g. <code>N[UNIMOD:7]</code>).
+      </p>
+
+      <h3 style="color: var(--navy); margin: 1.25rem 0 0.5rem; font-size: 1.15rem;">Common mass-tag modifications</h3>
+      <div style="overflow-x: auto; margin: 0.5rem 0 0.5rem;">
+        <table style="width:100%; max-width:900px; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); font-size: 0.95rem;">
+          <thead>
+            <tr style="background: var(--navy); color: white;">
+              <th style="padding: 0.65rem 0.85rem; text-align: left;">Notation</th>
+              <th style="padding: 0.65rem 0.85rem; text-align: left;">Amino acid</th>
+              <th style="padding: 0.65rem 0.85rem; text-align: left;">Unmodified residue ≈</th>
+              <th style="padding: 0.65rem 0.85rem; text-align: left;">Modified residue ≈</th>
+              <th style="padding: 0.65rem 0.85rem; text-align: left;">Δ mass</th>
+              <th style="padding: 0.65rem 0.85rem; text-align: left;">Meaning</th>
+              <th style="padding: 0.65rem 0.85rem; text-align: left;">UNIMOD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.55rem 0.85rem;"><code>N[115]</code></td>
+              <td style="padding: 0.55rem 0.85rem;">Asn (N)</td>
+              <td style="padding: 0.55rem 0.85rem;">114.04</td>
+              <td style="padding: 0.55rem 0.85rem;">115.03</td>
+              <td style="padding: 0.55rem 0.85rem;">+0.9840</td>
+              <td style="padding: 0.55rem 0.85rem;">Deamidated Asn</td>
+              <td style="padding: 0.55rem 0.85rem;"><strong>UNIMOD:7</strong></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+              <td style="padding: 0.55rem 0.85rem;"><code>Q[129]</code></td>
+              <td style="padding: 0.55rem 0.85rem;">Gln (Q)</td>
+              <td style="padding: 0.55rem 0.85rem;">128.06</td>
+              <td style="padding: 0.55rem 0.85rem;">129.04</td>
+              <td style="padding: 0.55rem 0.85rem;">+0.9840</td>
+              <td style="padding: 0.55rem 0.85rem;">Deamidated Gln</td>
+              <td style="padding: 0.55rem 0.85rem;"><strong>UNIMOD:7</strong></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.55rem 0.85rem;"><code>M[147]</code></td>
+              <td style="padding: 0.55rem 0.85rem;">Met (M)</td>
+              <td style="padding: 0.55rem 0.85rem;">131.04</td>
+              <td style="padding: 0.55rem 0.85rem;">147.04</td>
+              <td style="padding: 0.55rem 0.85rem;">+15.9949</td>
+              <td style="padding: 0.55rem 0.85rem;">Oxidized Met</td>
+              <td style="padding: 0.55rem 0.85rem;"><strong>UNIMOD:35</strong></td>
+            </tr>
+            <tr style="background: #f8fafc;">
+              <td style="padding: 0.55rem 0.85rem;"><code>P[113]</code></td>
+              <td style="padding: 0.55rem 0.85rem;">Pro (P)</td>
+              <td style="padding: 0.55rem 0.85rem;">97.05</td>
+              <td style="padding: 0.55rem 0.85rem;">113.05</td>
+              <td style="padding: 0.55rem 0.85rem;">+15.9949</td>
+              <td style="padding: 0.55rem 0.85rem;">Hydroxylated / oxidized Pro</td>
+              <td style="padding: 0.55rem 0.85rem;"><strong>UNIMOD:35</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-top: 0.5rem;">
+        Example: <code>P[113]</code> or <code>P(15.9949)</code> = proline with oxidation/hydroxylation
+        (<code>P[UNIMOD:35]</code>) — frequent in collagen extracellular-matrix peptides.
+      </p>
+    </div>
+  </section>
+
+  <!-- Documentation -->
+  <section class="publications" id="documentation">
+    <div class="section-inner">
+      <div class="section-title">
+        <div class="section-bar"></div>
+        <h2>Documentation</h2>
+      </div>
+
+      <h3 style="color: var(--navy); margin: 1rem 0 0.5rem; font-size: 1.15rem;">Data processing</h3>
+      <p>
+        PAMSI PSM and fragment ion tables were generated with <strong>FragPipe 24.0</strong> using MSFragger search.
+        Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation.
+      </p>
+      <p>
+        In the search engine Precursor table, numeric fields are shown with fixed precision:
+        <strong>Calculated.Peptide.Mass</strong> — 3 decimals;
+        <strong>Hyperscore</strong> — 2 decimals;
+        <strong>Calibrated.Observed.Mass</strong>, <strong>Calibrated.Observed.M.Z</strong>, and <strong>Calibrated.Observed.M+H</strong> — 4 decimals.
+      </p>
+
+      <h3 style="color: var(--navy); margin: 1.5rem 0 0.5rem; font-size: 1.15rem;">UNIMOD modification codes</h3>
+      <p>Common modification codes in the <code>Modified.Peptide.Unimod</code> column:</p>
+      <div style="overflow-x: auto; margin: 0.75rem 0 1rem;">
+        <table style="width:100%; max-width:640px; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+          <thead>
+            <tr style="background: var(--navy); color: white;">
+              <th style="padding: 0.65rem 1rem; text-align: left;">Code</th>
+              <th style="padding: 0.65rem 1rem; text-align: left;">Modification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:35</strong></td><td style="padding: 0.6rem 1rem;">Hydroxylation of Proline (oxidation)</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:7</strong></td><td style="padding: 0.6rem 1rem;">Deamidation</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:1</strong></td><td style="padding: 0.6rem 1rem;">Acetylation</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:4</strong></td><td style="padding: 0.6rem 1rem;">Carbamidomethyl</td></tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:21</strong></td><td style="padding: 0.6rem 1rem;">Phosphorylation</td></tr>
+            <tr style="background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:34</strong></td><td style="padding: 0.6rem 1rem;">Methylation</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color: var(--muted); font-size: 0.95rem;">
+        Example: <code>P[UNIMOD:35]</code> denotes hydroxylated proline — common in extracellular matrix collagen peptides.
+      </p>
+
+      <h3 style="color: var(--navy); margin: 1.5rem 0 0.5rem; font-size: 1.15rem;">Spectrum viewer — zoom &amp; pan</h3>
+      <p>In the PAMSI Search Engine spectrum viewer:</p>
+      <ul style="margin: 0.5rem 0 1rem 1.5rem;">
+        <li><strong>Scroll</strong> on the plot to zoom in or out</li>
+        <li><strong>Click and drag</strong> to pan across m/z</li>
+        <li><strong>Double-click</strong> the plot to reset zoom</li>
+        <li><strong>Hover</strong> a peak to see ion label, m/z, and intensity</li>
+      </ul>
+      <p style="color: var(--muted); font-size: 0.95rem;">
+        Ion labels (b/y) are angled to reduce overlap. Open <strong>Query Database</strong> to use the interactive viewer.
+      </p>
     </div>
   </section>
 
@@ -444,6 +571,7 @@
   </footer>
 
   <script>
+    // Side menu toggle
     const sideMenu = document.getElementById('sideMenu');
     const overlay = document.getElementById('overlay');
     const openBtn = document.getElementById('openMenu');
@@ -466,6 +594,7 @@
       link.addEventListener('click', closeMenu);
     });
 
+    // Pie chart — 60 Human TNBC + 16 Mouse Cochlea = 76
     const ctx = document.getElementById('sampleChart').getContext('2d');
     new Chart(ctx, {
       type: 'pie',
