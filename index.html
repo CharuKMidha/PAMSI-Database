@@ -474,64 +474,6 @@
     </div>
   </section>
 
-  <!-- Documentation -->
-  <section class="publications" id="documentation">
-    <div class="section-inner">
-      <div class="section-title">
-        <div class="section-bar"></div>
-        <h2>Documentation</h2>
-      </div>
-
-      <h3 style="color: var(--navy); margin: 1rem 0 0.5rem; font-size: 1.15rem;">Data processing</h3>
-      <p>
-        PAMSI PSM and fragment ion tables were generated with <strong>FragPipe 24.0</strong> using MSFragger search.
-        Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation.
-      </p>
-      <p>
-        In the search engine Precursor table, numeric fields are shown with fixed precision:
-        <strong>Calculated.Peptide.Mass</strong> — 3 decimals;
-        <strong>Hyperscore</strong> — 2 decimals;
-        <strong>Calibrated.Observed.Mass</strong>, <strong>Calibrated.Observed.M.Z</strong>, and <strong>Calibrated.Observed.M+H</strong> — 4 decimals.
-      </p>
-
-      <h3 style="color: var(--navy); margin: 1.5rem 0 0.5rem; font-size: 1.15rem;">UNIMOD modification codes</h3>
-      <p>Common modification codes in the <code>Modified.Peptide.Unimod</code> column:</p>
-      <div style="overflow-x: auto; margin: 0.75rem 0 1rem;">
-        <table style="width:100%; max-width:640px; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-          <thead>
-            <tr style="background: var(--navy); color: white;">
-              <th style="padding: 0.65rem 1rem; text-align: left;">Code</th>
-              <th style="padding: 0.65rem 1rem; text-align: left;">Modification</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:35</strong></td><td style="padding: 0.6rem 1rem;">Hydroxylation of Proline (oxidation)</td></tr>
-            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:7</strong></td><td style="padding: 0.6rem 1rem;">Deamidation</td></tr>
-            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:1</strong></td><td style="padding: 0.6rem 1rem;">Acetylation</td></tr>
-            <tr style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:4</strong></td><td style="padding: 0.6rem 1rem;">Carbamidomethyl</td></tr>
-            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:21</strong></td><td style="padding: 0.6rem 1rem;">Phosphorylation</td></tr>
-            <tr style="background: #f8fafc;"><td style="padding: 0.6rem 1rem;"><strong>UNIMOD:34</strong></td><td style="padding: 0.6rem 1rem;">Methylation</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="color: var(--muted); font-size: 0.95rem;">
-        Example: <code>P[UNIMOD:35]</code> denotes hydroxylated proline — common in extracellular matrix collagen peptides.
-      </p>
-
-      <h3 style="color: var(--navy); margin: 1.5rem 0 0.5rem; font-size: 1.15rem;">Spectrum viewer — zoom &amp; pan</h3>
-      <p>In the PAMSI Search Engine spectrum viewer:</p>
-      <ul style="margin: 0.5rem 0 1rem 1.5rem;">
-        <li><strong>Scroll</strong> on the plot to zoom in or out</li>
-        <li><strong>Click and drag</strong> to pan across m/z</li>
-        <li><strong>Double-click</strong> the plot to reset zoom</li>
-        <li><strong>Hover</strong> a peak to see ion label, m/z, and intensity</li>
-      </ul>
-      <p style="color: var(--muted); font-size: 0.95rem;">
-        Ion labels (b/y) are angled to reduce overlap. Open <strong>Query Database</strong> to use the interactive viewer.
-      </p>
-    </div>
-  </section>
-
   <!-- Publications -->
   <section class="publications">
     <div class="section-inner">
