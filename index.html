@@ -5,18 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PAMSI Atlas Home</title>
   <meta name="description" content="PAMSI — Peptide Atlas for Mass Spectrometry Imaging of Extracellular Matrix Proteome" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --navy: #1a365d;
       --dark-navy: #0f2744;
-      --header-bg: #ffffff;
-      --header-text: #1a365d;
-      --yellow: #f1c40f;
-      --beige: #f5f0e6;
-      --light-blue: #d6e4f0;
+      --header-bg: #1a365d;      /* blue panel bar */
+      --header-text: #ffffff;    /* white title */
+      --section-bar: #0d9488;    /* teal bars */
+      --beige: #f7f5f2;
+      --light-blue: #e8f0f7;
       --text: #1a365d;
       --muted: #4a5568;
+      --link: #2b6cb0;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -30,29 +34,34 @@
     .top-banner {
       background: var(--header-bg);
       color: var(--header-text);
-      padding: 1.15rem 1.5rem;
+      padding: 1.2rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: relative;
       z-index: 100;
       gap: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border-bottom: none;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+      /* curved bottom corners */
+      border-radius: 0 0 22px 22px;
+      margin: 0 0.6rem;
     }
     .top-banner h1 {
-      font-size: 2.45rem;
-      font-weight: 500;
-      letter-spacing: 0.5px;
+      font-family: "Montserrat", "Segoe UI", sans-serif;
+      font-size: 2.35rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
       margin: 0 auto;
       text-align: center;
       flex: 1;
-      color: var(--navy);
+      color: #ffffff;
+      text-transform: none;
     }
     .menu-btn {
       background: none;
       border: none;
-      color: var(--navy);
+      color: #ffffff;
       font-size: 1.7rem;
       cursor: pointer;
       padding: 0.2rem 0.4rem;
@@ -156,7 +165,7 @@
     .section-bar {
       width: 8px;
       height: 32px;
-      background: var(--yellow);
+      background: var(--section-bar);  /* teal */
       border-radius: 2px;
       flex-shrink: 0;
     }
