@@ -15,17 +15,24 @@ st.set_page_config(
 
 # ================== HEADER ==================
 LOGO = Path("assets/PAMSIlogotransparent2.png")
-col_logo, col_title = st.columns([1, 5])
+# Wider logo column so logo matches title visual weight
+col_logo, col_title = st.columns([2.2, 5])
 with col_logo:
     if LOGO.exists():
-        st.image(str(LOGO), width=140)
+        st.image(str(LOGO), width=320)  # was 140 — ~title height
+    else:
+        st.markdown("### 🧬 PAMSI")
 with col_title:
-    st.title("PAMSI — Peptide Atlas for Mass Spectrometry Imaging")
+    st.markdown(
+        '<h1 style="margin-bottom:0.15rem; font-size:2.1rem; line-height:1.2;">'
+        "PAMSI — Peptide Atlas for Mass Spectrometry Imaging"
+        "</h1>",
+        unsafe_allow_html=True,
+    )
     st.caption(
         "MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • "
         "Human + Mouse datasets • Private Access"
     )
-
 # ================== PASSWORD PROTECTION ==================
 if "password_correct" not in st.session_state:
     st.session_state.password_correct = False
