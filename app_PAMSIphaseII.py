@@ -33,6 +33,7 @@ with col_title:
         "MALDI Imaging Mass Spectrometry • Extracellular Matrix Proteome • "
         "Human + Mouse datasets • Private Access"
     )
+
 # ================== PASSWORD PROTECTION ==================
 if "password_correct" not in st.session_state:
     st.session_state.password_correct = False
@@ -95,10 +96,8 @@ def ensure_fragments_tsv(dataset_name: str):
     """Ensure the fragment TSV for a given dataset is on disk (on demand)."""
     cfg = DATASETS[dataset_name]
     frag_tsv = cfg["frag_tsv_local"]
-
     if frag_tsv.exists() and frag_tsv.stat().st_size > 0:
         return frag_tsv
-
     if cfg["is_zipped"]:
         download_with_ua(cfg["frag_url"], cfg["frag_zip_local"])
         with zipfile.ZipFile(cfg["frag_zip_local"], "r") as zf:
@@ -115,7 +114,6 @@ def ensure_fragments_tsv(dataset_name: str):
                     out.write(chunk)
     else:
         download_with_ua(cfg["frag_url"], frag_tsv)
-
     return frag_tsv
 
 
@@ -130,14 +128,12 @@ def load_psm():
         "Protein", "Gene", "Protein.Description", "Precursor", "USI",
         "Tissue", "Organism", "InstrumentModel", "ExperimentID",
     ]
-
     dfs = []
     for exp_name, cfg in DATASETS.items():
         download_with_ua(cfg["psm_url"], cfg["psm_local"])
         df_part = pd.read_csv(cfg["psm_local"], sep="\t", usecols=lambda c: c in usecols)
         df_part["Experiment_Table"] = exp_name
         dfs.append(df_part)
-
     return pd.concat(dfs, ignore_index=True)
 
 
@@ -167,7 +163,6 @@ exp_options = sorted(df["Experiment_Table"].dropna().unique().tolist())
 
 # ================== SIDEBAR FILTERS ==================
 st.sidebar.header("🔎 PAMSI Search Controls")
-
 st.sidebar.subheader("Target Calibrated Observed Mass + H values")
 mass_input = st.sidebar.text_area(
     "Enter mass (Add m/z here in comma-separated or one per line)",
@@ -175,17 +170,14 @@ mass_input = st.sidebar.text_area(
     height=100,
     help="Paste a list with commas or one mass per line (from Calibrated.Observed.M+H)",
 )
-
 ppm_tolerance = st.sidebar.number_input(
     "Tolerance (ppm)", min_value=0, max_value=1000, value=15, step=1
 )
-
 experiments = st.sidebar.multiselect(
     "Experiments",
     options=exp_options,
     default=exp_options,
 )
-
 protein_filter = st.sidebar.text_input("Filter by Protein / Gene ID (e.g. COL1A1, CO1A1)")
 
 # ================== SEARCH ==================
@@ -199,9 +191,7 @@ if st.sidebar.button("🔍 Search", type="primary", use_container_width=True):
                     targets.append(float(x))
                 except ValueError:
                     pass
-
         mask = df["Experiment_Table"].isin(experiments)
-
         if targets and "Calibrated.Observed.M+H" in df.columns:
             mass_col = df["Calibrated.Observed.M+H"].astype(float).values
             mass_mask = np.zeros(len(df), dtype=bool)
@@ -209,14 +199,12 @@ if st.sidebar.button("🔍 Search", type="primary", use_container_width=True):
                 window = t * ppm_tolerance / 1e6
                 mass_mask |= (mass_col >= t - window) & (mass_col <= t + window)
             mask &= mass_mask
-
         if protein_filter.strip():
             pf = protein_filter.strip()
             mask &= (
                 df["Protein"].fillna("").astype(str).str.contains(pf, case=False)
                 | df["Gene"].fillna("").astype(str).str.contains(pf, case=False)
             )
-
         filtered = df[mask].copy()
         st.session_state["filtered"] = filtered
         st.session_state["targets"] = targets
@@ -276,7 +264,7 @@ if "filtered" in st.session_state:
             margin=dict(t=40, b=60),
         )
         st.plotly_chart(fig_bar, use_container_width=True)
-        
+
         display_cols = [
             "Calibrated.Observed.M+H", "Calibrated.Observed.Mass", "Modified.Peptide.Unimod",
             "Charge", "Hyperscore", "Ion.Mobility", "Experiment_Table", "Tissue",
@@ -298,23 +286,24 @@ if "filtered" in st.session_state:
             file_name=f"pamsi_results_±{ppm}ppm.csv",
             mime="text/csv",
         )
+
         st.markdown(
             "Files were searched with **FragPipe 24.0** (MSFragger) and pre-processed with an "
             "in-house R script available on "
-            "[GitHub (PAMSI-Database)](https://github.com/CharuKMidha/PAMSI-Database)."
-            "Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation."
+            "[GitHub (PAMSI-Database)](https://github.com/CharuKMidha/PAMSI-Database). "
+            "Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation. "
             "Modified residues may appear as mass tags (e.g. `N[115]`) or as UNIMOD annotations "
-            "(e.g. `N[UNIMOD:7]`). "
+            "(e.g. `N[UNIMOD:7]`)."
         )
         with st.expander("Common mass-tag modifications", expanded=False):
             st.markdown(
                 """
-                | Notation | Amino acid | Unmodified residue ≈ | Modified residue ≈ | Δ mass | Meaning | UNIMOD |
-                |----------|------------|----------------------|--------------------|--------|---------|--------|
-                | **N[115]** | Asn (N) | 114.04 | 115.03 | +0.9840 | Deamidated Asn | **UNIMOD:7** |
-                | **Q[129]** | Gln (Q) | 128.06 | 129.04 | +0.9840 | Deamidated Gln | **UNIMOD:7** |
-                | **M[147]** | Met (M) | 131.04 | 147.04 | +15.9949 | Oxidized Met | **UNIMOD:35** |
-                | **P[113]** | Pro (P) | 97.05 | 113.05 | +15.9949 | Hydroxylated / oxidized Pro | **UNIMOD:35** |
+| Notation | Amino acid | Unmodified residue ≈ | Modified residue ≈ | Δ mass | Meaning | UNIMOD |
+|----------|------------|----------------------|--------------------|--------|---------|--------|
+| **N[115]** | Asn (N) | 114.04 | 115.03 | +0.9840 | Deamidated Asn | **UNIMOD:7** |
+| **Q[129]** | Gln (Q) | 128.06 | 129.04 | +0.9840 | Deamidated Gln | **UNIMOD:7** |
+| **M[147]** | Met (M) | 131.04 | 147.04 | +15.9949 | Oxidized Met | **UNIMOD:35** |
+| **P[113]** | Pro (P) | 97.05 | 113.05 | +15.9949 | Hydroxylated / oxidized Pro | **UNIMOD:35** |
                 """
             )
             st.caption(
@@ -397,7 +386,6 @@ if "filtered" in st.session_state:
                         yanchor="bottom",
                         yshift=4,
                     )
-
                 fig.update_layout(
                     title=f"Annotated Spectrum – {meta.get('Precursor', '')} ({selected_exp})",
                     xaxis_title="m/z",
@@ -419,32 +407,33 @@ if "filtered" in st.session_state:
                     title_font=dict(size=16, color="black"),
                 )
                 st.plotly_chart(fig, use_container_width=True)
-        
-        # ---- Zoom / pan help (BEFORE fragment ion table) ----
-        st.markdown("#### Spectrum viewer — zoom & pan")
-        st.markdown(
-            """
-            - **Scroll** on the plot to zoom in or out
-            - **Click and drag** to pan across m/z
-            - **Double-click** the plot to reset zoom
-            - **Hover** a peak to see ion label, m/z, and intensity
-            
-            Ion labels (b/y) are angled to reduce overlap.
-            """
-        )
-        with st.expander("Fragment ion table"):
-            st.dataframe(
-                frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
-                use_container_width=True,
-                hide_index=True,
-            )
-    else:
-        st.info(
-            "Adjust parameters on the left and click **🔍 Search** to query the PAMSI database "
-            "and open the spectrum viewer."
-        )
-        
-        st.caption(
-            "✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • "
-            "USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026"
-        )
+
+                # ---- Zoom / pan help (BEFORE fragment ion table) ----
+                st.markdown("#### Spectrum viewer — zoom & pan")
+                st.markdown(
+                    """
+- **Scroll** on the plot to zoom in or out
+- **Click and drag** to pan across m/z
+- **Double-click** the plot to reset zoom
+- **Hover** a peak to see ion label, m/z, and intensity
+
+Ion labels (b/y) are angled to reduce overlap.
+                    """
+                )
+
+                with st.expander("Fragment ion table"):
+                    st.dataframe(
+                        frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+else:
+    st.info(
+        "Adjust parameters on the left and click **🔍 Search** to query the PAMSI database "
+        "and open the spectrum viewer."
+    )
+
+st.caption(
+    "✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • "
+    "USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026"
+)
