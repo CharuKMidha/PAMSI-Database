@@ -449,4 +449,5 @@ else:
 st.caption(
     "✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • "
     "USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026"
+    "This site uses analytics to improve PAMSI Database"
 )
