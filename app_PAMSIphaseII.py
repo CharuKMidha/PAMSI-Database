@@ -298,6 +298,28 @@ if "filtered" in st.session_state:
             file_name=f"pamsi_results_±{ppm}ppm.csv",
             mime="text/csv",
         )
+                st.markdown(
+                    "Files were searched with **FragPipe 24.0** (MSFragger) and pre-processed with an "
+                    "in-house R script available on "
+                    "[GitHub (PAMSI-Database)](https://github.com/CharuKMidha/PAMSI-Database). "
+                    "Modified residues may appear as mass tags (e.g. `N[115]`) or as UNIMOD annotations "
+                    "(e.g. `N[UNIMOD:7]`)."
+                )
+        with st.expander("Common mass-tag modifications", expanded=False):
+            st.markdown(
+                """
+| Notation | Amino acid | Unmodified residue ≈ | Modified residue ≈ | Δ mass | Meaning | UNIMOD |
+|----------|------------|----------------------|--------------------|--------|---------|--------|
+| **N[115]** | Asn (N) | 114.04 | 115.03 | +0.9840 | Deamidated Asn | **UNIMOD:7** |
+| **Q[129]** | Gln (Q) | 128.06 | 129.04 | +0.9840 | Deamidated Gln | **UNIMOD:7** |
+| **M[147]** | Met (M) | 131.04 | 147.04 | +15.9949 | Oxidized Met | **UNIMOD:35** |
+| **P[113]** | Pro (P) | 97.05 | 113.05 | +15.9949 | Hydroxylated / oxidized Pro | **UNIMOD:35** |
+                """
+            )
+            st.caption(
+                "Example: `P[113]` or `P(15.9949)` = proline with oxidation/hydroxylation "
+                "(`P[UNIMOD:35]`) — frequent in collagen extracellular-matrix peptides."
+            )
 
         # ========== SPECTRUM VIEWER ==========
         st.markdown("---")
