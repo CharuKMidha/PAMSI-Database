@@ -298,14 +298,14 @@ if "filtered" in st.session_state:
             file_name=f"pamsi_results_±{ppm}ppm.csv",
             mime="text/csv",
         )
-                st.markdown(
-                    "Files were searched with **FragPipe 24.0** (MSFragger) and pre-processed with an "
-                    "in-house R script available on "
-                    "[GitHub (PAMSI-Database)](https://github.com/CharuKMidha/PAMSI-Database)."
-                    "Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation."
-                    "Modified residues may appear as mass tags (e.g. `N[115]`) or as UNIMOD annotations "
-                    "(e.g. `N[UNIMOD:7]`). "
-                )
+        st.markdown(
+            "Files were searched with **FragPipe 24.0** (MSFragger) and pre-processed with an "
+            "in-house R script available on "
+            "[GitHub (PAMSI-Database)](https://github.com/CharuKMidha/PAMSI-Database)."
+            "Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation."
+            "Modified residues may appear as mass tags (e.g. `N[115]`) or as UNIMOD annotations "
+            "(e.g. `N[UNIMOD:7]`). "
+        )
         with st.expander("Common mass-tag modifications", expanded=False):
             st.markdown(
                 """
