@@ -276,7 +276,7 @@ if "filtered" in st.session_state:
             margin=dict(t=40, b=60),
         )
         st.plotly_chart(fig_bar, use_container_width=True)
-
+        
         display_cols = [
             "Calibrated.Observed.M+H", "Calibrated.Observed.Mass", "Modified.Peptide.Unimod",
             "Charge", "Hyperscore", "Ion.Mobility", "Experiment_Table", "Tissue",
@@ -301,19 +301,20 @@ if "filtered" in st.session_state:
                 st.markdown(
                     "Files were searched with **FragPipe 24.0** (MSFragger) and pre-processed with an "
                     "in-house R script available on "
-                    "[GitHub (PAMSI-Database)](https://github.com/CharuKMidha/PAMSI-Database). "
+                    "[GitHub (PAMSI-Database)](https://github.com/CharuKMidha/PAMSI-Database)."
+                    "Best-scoring PSMs (by Hyperscore) were retained per spectrum. Modified peptide sequences use UNIMOD annotation."
                     "Modified residues may appear as mass tags (e.g. `N[115]`) or as UNIMOD annotations "
-                    "(e.g. `N[UNIMOD:7]`)."
+                    "(e.g. `N[UNIMOD:7]`). "
                 )
         with st.expander("Common mass-tag modifications", expanded=False):
             st.markdown(
                 """
-| Notation | Amino acid | Unmodified residue ≈ | Modified residue ≈ | Δ mass | Meaning | UNIMOD |
-|----------|------------|----------------------|--------------------|--------|---------|--------|
-| **N[115]** | Asn (N) | 114.04 | 115.03 | +0.9840 | Deamidated Asn | **UNIMOD:7** |
-| **Q[129]** | Gln (Q) | 128.06 | 129.04 | +0.9840 | Deamidated Gln | **UNIMOD:7** |
-| **M[147]** | Met (M) | 131.04 | 147.04 | +15.9949 | Oxidized Met | **UNIMOD:35** |
-| **P[113]** | Pro (P) | 97.05 | 113.05 | +15.9949 | Hydroxylated / oxidized Pro | **UNIMOD:35** |
+                | Notation | Amino acid | Unmodified residue ≈ | Modified residue ≈ | Δ mass | Meaning | UNIMOD |
+                |----------|------------|----------------------|--------------------|--------|---------|--------|
+                | **N[115]** | Asn (N) | 114.04 | 115.03 | +0.9840 | Deamidated Asn | **UNIMOD:7** |
+                | **Q[129]** | Gln (Q) | 128.06 | 129.04 | +0.9840 | Deamidated Gln | **UNIMOD:7** |
+                | **M[147]** | Met (M) | 131.04 | 147.04 | +15.9949 | Oxidized Met | **UNIMOD:35** |
+                | **P[113]** | Pro (P) | 97.05 | 113.05 | +15.9949 | Hydroxylated / oxidized Pro | **UNIMOD:35** |
                 """
             )
             st.caption(
@@ -418,6 +419,20 @@ if "filtered" in st.session_state:
                     title_font=dict(size=16, color="black"),
                 )
                 st.plotly_chart(fig, use_container_width=True)
+        
+        # ---- Zoom / pan help (BEFORE fragment ion table) ----
+        st.markdown("#### Spectrum viewer — zoom & pan")
+        st.markdown(
+            """
+            - **Scroll** on the plot to zoom in or out
+            - **Click and drag** to pan across m/z
+            - **Double-click** the plot to reset zoom
+            - **Hover** a peak to see ion label, m/z, and intensity
+            
+            Ion labels (b/y) are angled to reduce overlap.
+            """
+        )
+        with st.expander("Fragment ion table"):
 
                 with st.expander("Fragment ion table"):
                     st.dataframe(
