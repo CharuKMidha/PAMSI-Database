@@ -12,6 +12,19 @@ st.set_page_config(
     page_icon="🧬",
     layout="wide",
 )
+# ========================= ADDED GOOGLE ANALYTICS ================================
+st.components.v1.html(
+    """
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TWSSHL3T64"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TWSSHL3T64');
+    </script>
+    """,
+    height=0,
+)
 
 # ================== HEADER ==================
 LOGO = Path("assets/PAMSIlogotransparent2.png")
