@@ -433,20 +433,18 @@ if "filtered" in st.session_state:
             """
         )
         with st.expander("Fragment ion table"):
-
-                with st.expander("Fragment ion table"):
-                    st.dataframe(
-                        frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
-                        use_container_width=True,
-                        hide_index=True,
-                    )
-else:
-    st.info(
-        "Adjust parameters on the left and click **🔍 Search** to query the PAMSI database "
-        "and open the spectrum viewer."
-    )
-
-st.caption(
-    "✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • "
-    "USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026"
-)
+            st.dataframe(
+                frags[["Ion_Label", "Ion_mz", "Ion_Intensity"]].sort_values("Ion_mz"),
+                use_container_width=True,
+                hide_index=True,
+            )
+    else:
+        st.info(
+            "Adjust parameters on the left and click **🔍 Search** to query the PAMSI database "
+            "and open the spectrum viewer."
+        )
+        
+        st.caption(
+            "✅ Private mode • Human + Mouse datasets • Data from GitHub Release only • "
+            "USI-linked spectrum viewer • Author Dr. Charu Kapil Midha & Prof. Peggi Angel • 2026"
+        )
